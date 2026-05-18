@@ -135,8 +135,9 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
     <div class="sh"><div class="sn" style="background:#333">✎</div><div class="st">월별 목표 수정 <span class="badge badge-edit">수정 가능</span></div></div>
     <div class="sd">아래 표에서 숫자를 직접 수정하면 위 카드·주차별 표가 자동 재계산됩니다.</div>
     <div style="margin-bottom:12px">
-        <button class="btn-share" onclick="shareState()">공유 링크 생성</button>
-        <button class="btn btn-sec" onclick="resetAll()">원래대로 되돌리기</button>
+        <button class="btn-share" onclick="saveToGH()">저장</button>
+        <button class="btn btn-sec" onclick="loadLatest()">최신 불러오기</button>
+        <button class="btn btn-sec" onclick="resetAll()">초기값 되돌리기</button>
         <button class="btn btn-ghost" onclick="window.print()">인쇄 / PDF</button>
     </div>
     <div class="card" id="edit-table"></div>
@@ -239,9 +240,77 @@ const ORIG=CH.map(c=>[...c.monthly]);
 const ORIG_P=CH.map(c=>c.pat_pct);
 const PAT_MAX=30000,SOL_MAX=20000;
 
-function load(){try{const s=localStorage.getItem('q4v6');if(s){const d=JSON.parse(s);d.forEach((r,i)=>{if(CH[i]){CH[i].monthly=r.m;CH[i].pat_pct=r.p}})}}catch(e){}}
-function save(){localStorage.setItem('q4v6',JSON.stringify(CH.map(c=>({m:c.monthly,p:c.pat_pct}))))}
-function resetAll(){if(!confirm('원래대로 되돌릴까요?'))return;CH.forEach((c,i)=>{c.monthly=[...ORIG[i]];c.pat_pct=ORIG_P[i]});localStorage.removeItem('q4v6');renderAll()}
+const REPO='bmahsang/q4-doublehit-plan';
+let _ghSha=null;
+
+function getToken(){return localStorage.getItem('gh_tok')}
+function setToken(t){localStorage.setItem('gh_tok',t)}
+
+function resetAll(){if(!confirm('초기값으로 되돌릴까요?'))return;CH.forEach((c,i)=>{c.monthly=[...ORIG[i]];c.pat_pct=ORIG_P[i]});renderAll()}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>{t.style.display='none'},2500)}
+
+async function loadFromGH(){
+    try{
+        const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master&t='+Date.now());
+        if(!r.ok)return false;
+        const d=await r.json();
+        _ghSha=d.sha;
+        const s=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+        s.monthly.forEach((row,i)=>{if(CH[i])CH[i].monthly=row});
+        s.pat_pct.forEach((v,i)=>{if(CH[i])CH[i].pat_pct=v});
+        const b=document.getElementById('share-banner');
+        if(s.saved_by&&s.saved_by!=='initial'){
+            b.innerHTML='<span class="sb-who">'+s.saved_by+'</span> 님이 마지막 저장<span class="sb-time">'+s.saved_at+'</span>';
+            b.style.display='block';
+        }
+        return true;
+    }catch(e){return false}
+}
+
+async function saveToGH(){
+    let token=getToken();
+    if(!token){
+        token=prompt('팀 토큰을 입력하세요 (최초 1회만 입력)');
+        if(!token)return;
+        setToken(token);
+    }
+    const name=prompt('저장자 이름을 입력하세요 (예: 홍길동)');
+    if(!name)return;
+    const now=new Date();
+    const ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const state={monthly:CH.map(c=>c.monthly),pat_pct:CH.map(c=>c.pat_pct),saved_by:name,saved_at:ts};
+    const body=btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2))));
+    try{
+        if(!_ghSha){
+            const gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master',{headers:{'Authorization':'token '+token}});
+            if(gr.ok){const gd=await gr.json();_ghSha=gd.sha}
+        }
+        const pr=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json',{
+            method:'PUT',
+            headers:{'Authorization':'token '+token,'Content-Type':'application/json'},
+            body:JSON.stringify({message:name+' saved ('+ts+')',content:body,sha:_ghSha,branch:'master'})
+        });
+        if(pr.ok){
+            const pd=await pr.json();_ghSha=pd.content.sha;
+            const b=document.getElementById('share-banner');
+            b.innerHTML='<span class="sb-who">'+name+'</span> 님이 마지막 저장<span class="sb-time">'+ts+'</span>';
+            b.style.display='block';
+            toast('저장 완료!');
+        }else{
+            const err=await pr.json();
+            if(err.message&&err.message.includes('Bad credentials')){localStorage.removeItem('gh_tok');alert('토큰이 유효하지 않습니다. 다시 시도해주세요.')}
+            else if(err.message&&err.message.includes('does not match')){_ghSha=null;alert('다른 사람이 먼저 저장했습니다. "최신 불러오기" 후 다시 시도해주세요.')}
+            else{alert('저장 실패: '+(err.message||''))}
+        }
+    }catch(e){alert('네트워크 오류: '+e.message)}
+}
+
+async function loadLatest(){
+    const ok=await loadFromGH();
+    if(ok){renderAll();toast('최신 데이터를 불러왔습니다!')}
+    else{toast('불러오기 실패')}
+}
 function fCM(n){return n>=1e8?(n/1e8).toFixed(1)+'억':n>=1e4?Math.round(n/1e4).toLocaleString()+'만':n.toLocaleString()+'원'}
 function sum(a){return a.reduce((x,y)=>x+y,0)}
 
@@ -456,48 +525,6 @@ function onE(el){
 }
 function renderAll(){renderBars();renderCards();renderPS();renderEditor();renderWeekly()}
 
-function encodeState(){
-    const d={m:CH.map(c=>c.monthly),p:CH.map(c=>c.pat_pct)};
-    return btoa(unescape(encodeURIComponent(JSON.stringify(d))));
-}
-function decodeState(s){
-    try{return JSON.parse(decodeURIComponent(escape(atob(s))))}catch(e){return null}
-}
-
-function shareState(){
-    const name=prompt('저장자 이름을 입력하세요 (예: 홍길동)');
-    if(!name)return;
-    const now=new Date();
-    const ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    const payload=encodeState()+'|'+encodeURIComponent(name)+'|'+ts;
-    const url=location.origin+location.pathname+'#v='+payload;
-    navigator.clipboard.writeText(url).then(()=>{
-        const t=document.getElementById('toast');
-        t.textContent='링크가 클립보드에 복사되었습니다!';
-        t.style.display='block';
-        setTimeout(()=>{t.style.display='none'},2500);
-    }).catch(()=>{prompt('아래 링크를 복사하세요:',url)});
-}
-
-function loadFromHash(){
-    const h=location.hash;
-    if(!h||!h.startsWith('#v='))return false;
-    const raw=h.slice(3);
-    const parts=raw.split('|');
-    if(parts.length<3)return false;
-    const d=decodeState(parts[0]);
-    if(!d)return false;
-    const who=decodeURIComponent(parts[1]);
-    const when=parts[2];
-    d.m.forEach((r,i)=>{if(CH[i])CH[i].monthly=r});
-    d.p.forEach((v,i)=>{if(CH[i])CH[i].pat_pct=v});
-    const banner=document.getElementById('share-banner');
-    banner.innerHTML='<span class="sb-who">'+who+'</span> 님이 저장한 버전<span class="sb-time">'+when+'</span>';
-    banner.style.display='block';
-    return true;
-}
-
-if(!loadFromHash())load();
-renderAll();
+loadFromGH().then(ok=>{renderAll()});
 </script>
 </body></html>
