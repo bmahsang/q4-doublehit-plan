@@ -93,9 +93,16 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
 .etbl .esum{font-weight:800;font-size:13px}
 .etbl .ecm{font-size:11px;color:#2D5F2D;font-weight:600}
 .etbl .sep-row td{background:#FFF8F0;font-weight:700;border-top:2px solid #FFE0C0}
-@media print{.badge,.btn{display:none!important}.ei{border:none!important;background:transparent!important}body{padding:16px}}
+.share-banner{background:#1a1a1a;color:#fff;padding:14px 20px;border-radius:12px;margin-bottom:20px;display:none;font-size:13px}
+.share-banner .sb-who{font-weight:700;color:#FF6B35}.share-banner .sb-time{color:#aaa;margin-left:8px}
+.btn-share{background:#FF6B35;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit}
+.btn-share:hover{background:#e55a20}
+.share-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+@media print{.badge,.btn,.btn-share,.share-banner,.share-toast{display:none!important}.ei{border:none!important;background:transparent!important}body{padding:16px}}
 </style>
 </head><body><div class="page">
+
+<div id="share-banner" class="share-banner"></div>
 
 <div class="header">
     <div class="tag">BITE ME &mdash; Q4 FW 판매 계획</div>
@@ -128,6 +135,7 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
     <div class="sh"><div class="sn" style="background:#333">✎</div><div class="st">월별 목표 수정 <span class="badge badge-edit">수정 가능</span></div></div>
     <div class="sd">아래 표에서 숫자를 직접 수정하면 위 카드·주차별 표가 자동 재계산됩니다.</div>
     <div style="margin-bottom:12px">
+        <button class="btn-share" onclick="shareState()">공유 링크 생성</button>
         <button class="btn btn-sec" onclick="resetAll()">원래대로 되돌리기</button>
         <button class="btn btn-ghost" onclick="window.print()">인쇄 / PDF</button>
     </div>
@@ -213,6 +221,7 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
     <div class="todo"><div class="tn">6</div><div class="tt"><b>1월 소진 방식</b> (할인율/번들/아울렛)<span class="h">할인율에 따라 CM이 달라지므로 사전 합의 필요</span></div></div>
 </div>
 
+<div id="toast" class="share-toast"></div>
 <div class="footnote">
     주차별 분배: 2025 일별 출고 데이터(도착보장) + 채널별 판매 패턴 기반<br>
     수정 시 자동 저장 (같은 브라우저). 인쇄/PDF로 최종본 저장 가능.<br>
@@ -446,6 +455,49 @@ function onE(el){
     save();renderAll();
 }
 function renderAll(){renderBars();renderCards();renderPS();renderEditor();renderWeekly()}
-load();renderAll();
+
+function encodeState(){
+    const d={m:CH.map(c=>c.monthly),p:CH.map(c=>c.pat_pct)};
+    return btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+}
+function decodeState(s){
+    try{return JSON.parse(decodeURIComponent(escape(atob(s))))}catch(e){return null}
+}
+
+function shareState(){
+    const name=prompt('저장자 이름을 입력하세요 (예: 홍길동)');
+    if(!name)return;
+    const now=new Date();
+    const ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const payload=encodeState()+'|'+encodeURIComponent(name)+'|'+ts;
+    const url=location.origin+location.pathname+'#v='+payload;
+    navigator.clipboard.writeText(url).then(()=>{
+        const t=document.getElementById('toast');
+        t.textContent='링크가 클립보드에 복사되었습니다!';
+        t.style.display='block';
+        setTimeout(()=>{t.style.display='none'},2500);
+    }).catch(()=>{prompt('아래 링크를 복사하세요:',url)});
+}
+
+function loadFromHash(){
+    const h=location.hash;
+    if(!h||!h.startsWith('#v='))return false;
+    const raw=h.slice(3);
+    const parts=raw.split('|');
+    if(parts.length<3)return false;
+    const d=decodeState(parts[0]);
+    if(!d)return false;
+    const who=decodeURIComponent(parts[1]);
+    const when=parts[2];
+    d.m.forEach((r,i)=>{if(CH[i])CH[i].monthly=r});
+    d.p.forEach((v,i)=>{if(CH[i])CH[i].pat_pct=v});
+    const banner=document.getElementById('share-banner');
+    banner.innerHTML='<span class="sb-who">'+who+'</span> 님이 저장한 버전<span class="sb-time">'+when+'</span>';
+    banner.style.display='block';
+    return true;
+}
+
+if(!loadFromHash())load();
+renderAll();
 </script>
 </body></html>
