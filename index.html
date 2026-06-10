@@ -247,7 +247,7 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
 <!-- P-1.5 채널별 변동비 구조 -->
 <div class="sec">
     <div class="sh"><div class="sn" style="background:#E67E22;color:#fff">1.5</div><div class="st">채널별 비용 구조 <span class="badge badge-kpi">마케팅비 역산</span></div></div>
-    <div class="sd">마케팅비를 채널별로 수기 입력하면 기타 변동비(채널수수료+PG+물류 등)가 자동 산출됩니다.</div>
+    <div class="sd">기존 마케팅비 입력 → 기타 변동비(채널수수료+PG+물류) 고정. 신규 마케팅비를 변경하면 새 공헌이익에 반영됩니다.</div>
     <div class="card" style="overflow-x:auto" id="p-varcost"></div>
 </div>
 
@@ -401,7 +401,7 @@ function onE(el){const ci=+el.dataset.c,mi=+el.dataset.m;const v=parseInt(el.val
 function renderPlanAll(){renderBars();renderCards();renderPS();renderEditor();renderWeekly()}
 
 /* ========================================================
-   PRICING TAB — 소비자가+판매가 입력, 마케팅비 수기
+   PRICING TAB — 기존 마케팅비→기타고정, 신규 마케팅비→CM반영
    ======================================================== */
 const P=(function(){
     const fN=n=>n?Math.round(n).toLocaleString():'0';
@@ -413,7 +413,7 @@ const P=(function(){
         old_sol_retail:0,old_sol_price:0,old_sol_cogs:0,
         new_pat_retail:0,new_pat_price:0,new_pat_cogs:0,
         new_sol_retail:0,new_sol_price:0,new_sol_cogs:0,
-        mkt:{}
+        mkt_old:{},mkt_new:{}
     };
 
     function disc(retail,price){return retail>0?((1-price/retail)*100):0}
@@ -425,21 +425,29 @@ const P=(function(){
         return q.total>0?(patV*q.pat+solV*q.sol)/q.total:0;
     }
 
-    function varCostRatio(ci){
+    function oldVarPct(ci){
         const bp=blend(D.old_pat_price,D.old_sol_price,ci);
         const bc=blend(D.old_pat_cogs,D.old_sol_cogs,ci);
         if(bp<=0)return 0;
-        return(bp-bc-CH[ci].cm_unit)/bp;
+        return(bp-bc-CH[ci].cm_unit)/bp*100;
+    }
+
+    function otherPct(ci){
+        return oldVarPct(ci)-(D.mkt_old[ci]||0);
+    }
+
+    function newVarRatio(ci){
+        return(otherPct(ci)+(D.mkt_new[ci]||0))/100;
     }
 
     function newCmUnit(ci,priceMod,cogsMod){
         const pm=priceMod||0,cm0=cogsMod||0;
-        const q=getQty(ci);const vcr=varCostRatio(ci);
+        const q=getQty(ci);const nvr=newVarRatio(ci);
         if(q.total===0)return{pat:0,sol:0,blended:0};
         const pp=D.new_pat_price*(1+pm/100),pc=D.new_pat_cogs*(1+cm0/100);
         const sp=D.new_sol_price*(1+pm/100),sc=D.new_sol_cogs*(1+cm0/100);
-        const patCM=pp*(1-vcr)-pc;
-        const solCM=sp*(1-vcr)-sc;
+        const patCM=pp*(1-nvr)-pc;
+        const solCM=sp*(1-nvr)-sc;
         const blended=(patCM*q.pat+solCM*q.sol)/q.total;
         return{pat:patCM,sol:solCM,blended};
     }
@@ -501,41 +509,52 @@ const P=(function(){
         const hasOld=D.old_pat_price>0||D.old_sol_price>0;
         if(!hasOld){document.getElementById('p-varcost').innerHTML='<div style="text-align:center;color:#888;padding:20px">기존 판매가/원가를 먼저 입력하세요</div>';return}
         let h='<table class="etbl"><thead><tr>';
-        h+='<th>채널</th><th>총 변동비율</th>';
-        h+='<th style="color:#E67E22">마케팅비 %</th>';
-        h+='<th style="color:#3498DB">기타 변동비 %</th>';
-        h+='<th style="font-size:11px;color:#888">기타 = 채널수수료+PG+물류 등</th>';
+        h+='<th>채널</th><th>기존 총변동비</th>';
+        h+='<th style="color:#E67E22">기존 마케팅%</th>';
+        h+='<th style="color:#3498DB">기타%(고정)</th>';
+        h+='<th style="color:#E67E22;background:#FFF8F0;font-weight:800">신규 마케팅%</th>';
+        h+='<th>신규 총변동비</th>';
+        h+='<th>비중 비교</th>';
         h+='</tr></thead><tbody>';
-        let sVar=0,sMkt=0,sEtc=0,cnt=0;
+        let sOldV=0,sOldM=0,sOth=0,sNewM=0,sNewV=0,cnt=0;
         CH.forEach((c,ci)=>{
             if(c.short==='시딩')return;
             const q=getQty(ci);if(!q.total)return;
-            const vcr=varCostRatio(ci)*100;
-            const mk=D.mkt[ci]||0;
-            const etc=vcr-mk;
-            sVar+=vcr;sMkt+=mk;sEtc+=etc;cnt++;
-            const barW=Math.max(vcr,1);
-            const mkW=vcr>0?(mk/barW*100):0;
-            const etcW=100-mkW;
+            const ov=oldVarPct(ci);
+            const om=D.mkt_old[ci]||0;
+            const oth=ov-om;
+            const nm=D.mkt_new[ci]||0;
+            const nv=oth+nm;
+            sOldV+=ov;sOldM+=om;sOth+=oth;sNewM+=nm;sNewV+=nv;cnt++;
+
+            const barMax=Math.max(ov,nv,1);
+            const omW=(om/barMax*100);const othW=(oth/barMax*100);
+            const nmW=(nm/barMax*100);const nothW=(oth/barMax*100);
+
             h+='<tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:6px"></span>'+c.short+'</td>';
-            h+='<td style="font-weight:700">'+fP(vcr)+'</td>';
-            h+='<td><input class="pinp pinp-sm" style="width:56px;color:#E67E22;font-weight:700" value="'+(mk||'')+'" placeholder="0" onfocus="this.select()" onchange="P.onMkt('+ci+',this)" onblur="P.onMkt('+ci+',this)"></td>';
-            h+='<td style="font-weight:700;color:#3498DB">'+fP(etc)+'</td>';
-            h+='<td style="padding:6px"><div style="display:flex;height:16px;border-radius:8px;overflow:hidden;background:#eee;min-width:120px">';
-            h+='<div style="width:'+mkW+'%;background:#E67E22" title="마케팅 '+fP(mk)+'"></div>';
-            h+='<div style="width:'+etcW+'%;background:#3498DB" title="기타 '+fP(etc)+'"></div>';
+            h+='<td style="font-weight:700;color:#888">'+fP(ov)+'</td>';
+            h+='<td><input class="pinp pinp-sm" style="width:52px;color:#E67E22;font-weight:700" value="'+(om||'')+'" placeholder="0" onfocus="this.select()" onchange="P.onMktOld('+ci+',this)" onblur="P.onMktOld('+ci+',this)"></td>';
+            h+='<td style="font-weight:700;color:#3498DB">'+fP(oth)+'</td>';
+            h+='<td style="background:#FFF8F0"><input class="pinp pinp-sm" style="width:52px;color:#E67E22;font-weight:800" value="'+(nm||'')+'" placeholder="0" onfocus="this.select()" onchange="P.onMktNew('+ci+',this)" onblur="P.onMktNew('+ci+',this)"></td>';
+            h+='<td style="font-weight:700">'+fP(nv)+'</td>';
+            h+='<td style="padding:4px 6px"><div style="display:flex;flex-direction:column;gap:2px;min-width:100px">';
+            h+='<div style="display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eee" title="기존"><div style="width:'+omW+'%;background:#E67E22"></div><div style="width:'+othW+'%;background:#3498DB"></div></div>';
+            h+='<div style="display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eee" title="신규"><div style="width:'+nmW+'%;background:#FF8C00"></div><div style="width:'+nothW+'%;background:#3498DB"></div></div>';
             h+='</div></td></tr>';
         });
         if(cnt>0){
             h+='<tr class="sep-row"><td><b>평균</b></td>';
-            h+='<td><b>'+fP(sVar/cnt)+'</b></td>';
-            h+='<td style="color:#E67E22"><b>'+fP(sMkt/cnt)+'</b></td>';
-            h+='<td style="color:#3498DB"><b>'+fP(sEtc/cnt)+'</b></td><td></td></tr>';
+            h+='<td style="color:#888"><b>'+fP(sOldV/cnt)+'</b></td>';
+            h+='<td style="color:#E67E22"><b>'+fP(sOldM/cnt)+'</b></td>';
+            h+='<td style="color:#3498DB"><b>'+fP(sOth/cnt)+'</b></td>';
+            h+='<td style="color:#E67E22;background:#FFF8F0"><b>'+fP(sNewM/cnt)+'</b></td>';
+            h+='<td><b>'+fP(sNewV/cnt)+'</b></td><td></td></tr>';
         }
         h+='</tbody></table>';
-        h+='<div style="margin-top:8px;font-size:11px;color:#888;display:flex;gap:12px">';
-        h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#E67E22;vertical-align:middle"></span> 마케팅</span>';
-        h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3498DB;vertical-align:middle"></span> 기타 (채널수수료+PG+물류 등)</span></div>';
+        h+='<div style="margin-top:8px;font-size:11px;color:#888;display:flex;gap:14px">';
+        h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#E67E22;vertical-align:middle"></span> 마케팅(기존)</span>';
+        h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FF8C00;vertical-align:middle"></span> 마케팅(신규)</span>';
+        h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3498DB;vertical-align:middle"></span> 기타(고정)</span></div>';
         document.getElementById('p-varcost').innerHTML=h;
     }
 
@@ -545,7 +564,7 @@ const P=(function(){
         if(!hasOld&&!hasNew){document.getElementById('p-compare').innerHTML='<div style="text-align:center;color:#888;padding:40px">위에서 기존/신규 판매가·원가를 입력하세요</div>';document.getElementById('p-insight').innerHTML='';return{oldTotal:0,newTotal:0}}
 
         let h='<table class="etbl"><thead><tr><th>채널</th><th>수량</th>';
-        h+='<th style="color:#E67E22;font-size:11px">마케팅%</th><th style="color:#3498DB;font-size:11px">기타%</th>';
+        h+='<th style="color:#E67E22;font-size:11px">신규 마케팅%</th><th style="color:#3498DB;font-size:11px">기타%(고정)</th>';
         h+='<th style="color:#888">기존 cm_unit</th><th style="color:#888">기존 CM</th>';
         h+='<th style="color:#2D5F2D">신규 cm_unit</th><th style="color:#2D5F2D">신규 CM</th>';
         h+='<th>차이</th><th>변화율</th></tr></thead><tbody>';
@@ -556,24 +575,23 @@ const P=(function(){
         CH.forEach((c,ci)=>{
             if(c.short==='시딩')return;
             const q=getQty(ci);if(!q.total)return;
-            const vcr=varCostRatio(ci);
-            const mk=D.mkt[ci]||0;
-            const etc=vcr*100-mk;
+            const nm=D.mkt_new[ci]||0;
+            const oth=otherPct(ci);
             const oldCM=q.total*c.cm_unit;
             const nc=newCmUnit(ci,priceMod,cogsMod);
             const newCM=nc.pat*q.pat+nc.sol*q.sol;
             const diff=newCM-oldCM;
             const pct=oldCM!==0?(diff/Math.abs(oldCM)*100):0;
             oldTotal+=oldCM;newTotal+=newCM;totalQty+=q.total;
-            rows.push({c,ci,q,vcr,mk,etc,oldCM,nc,newCM,diff,pct});
+            rows.push({c,ci,q,nm,oth,oldCM,nc,newCM,diff,pct});
         });
 
         rows.forEach(d=>{
             const cls=d.diff>=0?'cm-pos':'cm-neg';
             h+='<tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+d.c.color+';margin-right:6px"></span>'+d.c.short+'</td>';
             h+='<td>'+fN(d.q.total)+'<span style="font-size:10px;color:#888"> (P'+fN(d.q.pat)+'/S'+fN(d.q.sol)+')</span></td>';
-            h+='<td style="font-size:11px;color:#E67E22">'+fP(d.mk)+'</td>';
-            h+='<td style="font-size:11px;color:#3498DB">'+fP(d.etc)+'</td>';
+            h+='<td style="font-size:11px;color:#E67E22">'+fP(d.nm)+'</td>';
+            h+='<td style="font-size:11px;color:#3498DB">'+fP(d.oth)+'</td>';
             h+='<td style="color:#888">'+fN(d.c.cm_unit)+'</td>';
             h+='<td style="color:#888">'+fW(d.oldCM)+'</td>';
             h+='<td style="color:#2D5F2D;font-weight:700">'+fN(Math.round(d.nc.blended))+'</td>';
@@ -643,14 +661,15 @@ const P=(function(){
         document.getElementById('sc-scenarios').innerHTML=h;
     }
 
-    function save(){localStorage.setItem('dh_pricing4',JSON.stringify(D))}
-    function load(){try{const s=localStorage.getItem('dh_pricing4');if(s){const p=JSON.parse(s);Object.assign(D,p);if(p.mkt)D.mkt=p.mkt}}catch(e){}}
+    function save(){localStorage.setItem('dh_pricing5',JSON.stringify(D))}
+    function load(){try{const s=localStorage.getItem('dh_pricing5');if(s){const p=JSON.parse(s);Object.assign(D,p);if(p.mkt_old)D.mkt_old=p.mkt_old;if(p.mkt_new)D.mkt_new=p.mkt_new}}catch(e){}}
 
     return{
         onD(k,el){D[k]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
-        onMkt(ci,el){D.mkt[ci]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
+        onMktOld(ci,el){D.mkt_old[ci]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
+        onMktNew(ci,el){D.mkt_new[ci]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
         getState(){return JSON.parse(JSON.stringify(D))},
-        setState(s){Object.assign(D,s);if(s.mkt)D.mkt=s.mkt},
+        setState(s){Object.assign(D,s);if(s.mkt_old)D.mkt_old=s.mkt_old;if(s.mkt_new)D.mkt_new=s.mkt_new},
         renderAll(){renderInputs();renderVarCost();renderCompare();renderScenario();save()},
         init(){load()},
         exportData(){toast('localStorage에 자동 저장됨')},
