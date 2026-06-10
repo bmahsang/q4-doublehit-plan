@@ -142,7 +142,7 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
 <!-- ===== TOP TAB BAR ===== -->
 <div class="top-tabs">
     <button class="top-tab active-plan" id="ttab-plan" onclick="switchTop('plan')">판매 운영안 <span class="tab-count">6</span></button>
-    <button class="top-tab" id="ttab-pricing" onclick="switchTop('pricing')">원가 / 프라이싱 <span class="tab-count" id="pricing-count">0</span></button>
+    <button class="top-tab" id="ttab-pricing" onclick="switchTop('pricing')">원가 / 프라이싱</button>
 </div>
 
 <!-- ============================================================ -->
@@ -225,75 +225,65 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
 <div id="panel-pricing" class="panel">
 
 <div class="bigs">
-    <div class="big"><div class="lb">과거 제품</div><div class="vl" style="color:#5B86E5" id="p-past">0</div><div class="dt">SKU 등록</div></div>
-    <div class="big"><div class="lb">과거 평균 CM율</div><div class="vl" style="color:#2D5F2D" id="p-avgcm">-</div><div class="dt">벤치마크 기준</div></div>
-    <div class="big"><div class="lb">신규 제품</div><div class="vl" style="color:#FF6B35" id="p-new">0</div><div class="dt">시뮬레이션 중</div></div>
-    <div class="big"><div class="lb">신규 예상 CM율</div><div class="vl" style="color:#E31837" id="p-newcm">-</div><div class="dt">채널 가중평균</div></div>
+    <div class="big"><div class="lb">총 매출</div><div class="vl" style="color:#FF6B35" id="p-rev">-</div><div class="dt">패턴+솔리드</div></div>
+    <div class="big"><div class="lb">총 공헌이익</div><div class="vl" style="color:#2D5F2D" id="p-cm">-</div><div class="dt">변동비 차감 후</div></div>
+    <div class="big"><div class="lb">가중평균 CM율</div><div class="vl" style="color:#2D5F2D" id="p-cmr">-</div><div class="dt">채널·상품 가중</div></div>
+    <div class="big"><div class="lb">장당 평균 CM</div><div class="vl" style="color:#5B86E5" id="p-cmunit">-</div><div class="dt">원 / 장</div></div>
 </div>
 
-<!-- P-1 과거 제품 -->
+<!-- P-1 상품 기본값 -->
 <div class="sec">
-    <div class="sh"><div class="sn sn-g">1</div><div class="st">과거 제품 원가/매출 구조 <span class="badge badge-past">기준 데이터</span></div></div>
-    <div class="sd">기존 SKU의 원가 구조를 입력하세요. 카테고리별 평균이 신규 프라이싱의 벤치마크가 됩니다.</div>
-    <div class="flex-bar">
-        <button class="btn btn-g" onclick="P.addPast()">+ 제품 추가</button>
-        <button class="btn btn-sec" onclick="P.addPastBulk()">일괄 추가 (5행)</button>
-        <button class="btn btn-sec" onclick="P.exportData()">JSON 내보내기</button>
-        <button class="btn btn-sec" onclick="document.getElementById('p-import').click()">JSON 불러오기</button>
-    </div>
-    <div class="card" style="overflow-x:auto">
-        <table class="etbl"><thead><tr>
-            <th>제품명</th><th>카테고리</th><th>판매가</th><th>생산원가</th>
-            <th>채널수수료%</th><th>물류비</th><th>PG%</th><th>마케팅%</th>
-            <th>순매출</th><th>원가율</th><th>CM</th><th>CM율</th><th></th>
-        </tr></thead>
-        <tbody id="p-past-body"></tbody>
-        <tfoot id="p-past-foot"></tfoot>
-        </table>
-    </div>
-</div>
-
-<!-- P-2 신규 제품 -->
-<div class="sec">
-    <div class="sh"><div class="sn sn-g">2</div><div class="st">신규 제품 프라이싱 <span class="badge badge-new">시뮬레이션</span></div></div>
-    <div class="sd">생산원가 + 목표 CM율 입력 → 채널별 권장 판매가를 역산합니다. 운영안의 채널 구조(cm_unit)와 연동됩니다.</div>
-    <div class="flex-bar">
-        <button class="btn btn-g" onclick="P.addNew()">+ 신규 제품 추가</button>
-    </div>
-    <div class="card" style="overflow-x:auto">
-        <table class="etbl"><thead><tr>
-            <th>제품명</th><th>카테고리</th><th>생산원가</th><th>목표CM%</th>
-            <th>채널수수료%</th><th>물류비</th><th>PG%</th><th>마케팅%</th>
-            <th style="color:#FF6B35">권장판매가</th><th>순매출</th><th>CM</th><th>CM율</th><th></th>
-        </tr></thead>
-        <tbody id="p-new-body"></tbody>
-        </table>
-    </div>
-    <div id="p-channel-detail"></div>
-</div>
-
-<!-- P-3 원가 변동 시나리오 -->
-<div class="sec">
-    <div class="sh"><div class="sn sn-g">3</div><div class="st">원가 변동 시나리오 <span class="badge badge-scenario">자동 계산</span></div></div>
-    <div class="sd">생산원가 변동 시 채널별 권장판매가·CM 변화를 시뮬레이션합니다.</div>
+    <div class="sh"><div class="sn sn-g">1</div><div class="st">상품 기본값 <span class="badge badge-past">패턴 / 솔리드</span></div></div>
+    <div class="sd">더블히트 패딩의 판매가·생산원가를 설정합니다. 수량은 운영안 탭에서 자동으로 가져옵니다.</div>
     <div class="card">
-        <div style="margin-bottom:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-            <div><label style="font-size:13px;font-weight:600">대상: </label>
-            <select class="pinp" id="sc-target" onchange="P.renderScenario()" style="width:180px;text-align:left"></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="p-product-cards"></div>
+    </div>
+</div>
+
+<!-- P-2 채널별 변동비 -->
+<div class="sec">
+    <div class="sh"><div class="sn sn-g">2</div><div class="st">채널별 변동비 <span class="badge badge-edit">수정 가능</span></div></div>
+    <div class="sd">채널마다 다른 수수료·물류비·PG·마케팅비를 설정합니다. 운영안의 채널과 자동 연동됩니다.</div>
+    <div class="card" style="overflow-x:auto">
+        <table class="etbl" id="p-cost-table">
+            <thead><tr>
+                <th>채널</th><th>패턴 수량</th><th>솔리드 수량</th><th>합계</th>
+                <th>채널수수료%</th><th>물류비(건당)</th><th>PG%</th><th>마케팅%</th><th>기타변동비</th>
+            </tr></thead>
+            <tbody id="p-cost-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- P-3 채널별 공헌이익 -->
+<div class="sec">
+    <div class="sh"><div class="sn sn-g">3</div><div class="st">채널별 공헌이익 시뮬레이션 <span class="badge badge-scenario">자동 계산</span></div></div>
+    <div class="sd">상품 기본값 × 채널 수량 × 변동비 → 채널별 매출·원가·CM을 자동 산출합니다.</div>
+    <div class="card" style="overflow-x:auto" id="p-cm-result"></div>
+    <div class="ib ib-i" style="margin-top:14px" id="p-cm-insight"></div>
+</div>
+
+<!-- P-4 원가/판매가 변동 시나리오 -->
+<div class="sec">
+    <div class="sh"><div class="sn sn-g">4</div><div class="st">원가·판매가 변동 시나리오</div></div>
+    <div class="sd">생산원가 또는 판매가가 변동될 때 전체 공헌이익에 미치는 영향을 시뮬레이션합니다.</div>
+    <div class="card">
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
             <div><label style="font-size:13px;font-weight:600">원가 변동: </label>
-            <input type="range" id="sc-slider" min="-50" max="50" value="0" oninput="P.renderScenario()" style="width:200px;vertical-align:middle">
-            <span id="sc-pct" style="font-weight:700;margin-left:6px">0%</span></div>
+            <input type="range" id="sc-cogs" min="-30" max="30" value="0" oninput="P.renderAll()" style="width:180px;vertical-align:middle">
+            <span id="sc-cogs-v" style="font-weight:700;margin-left:4px">0%</span></div>
+            <div><label style="font-size:13px;font-weight:600">판매가 변동 (할인): </label>
+            <input type="range" id="sc-price" min="-30" max="10" value="0" oninput="P.renderAll()" style="width:180px;vertical-align:middle">
+            <span id="sc-price-v" style="font-weight:700;margin-left:4px">0%</span></div>
         </div>
-        <div class="sc-grid" id="sc-cards"></div>
+        <div class="sc-grid" id="sc-scenarios"></div>
         <div class="card" style="margin-top:16px;background:#f9f9f9;box-shadow:none" id="sc-detail"></div>
     </div>
 </div>
 
-<!-- P-4 비교 -->
-<div class="sec">
-    <div class="sh"><div class="sn sn-g">4</div><div class="st">과거 vs 신규 비교 분석</div></div>
-    <div class="sd">카테고리별 원가 구조·CM율을 비교합니다. 운영안 채널 CM 단가와의 정합성도 확인합니다.</div>
-    <div class="card" id="p-compare"></div>
+<div style="margin-bottom:12px">
+    <button class="btn btn-g" onclick="P.exportData()">JSON 내보내기</button>
+    <button class="btn btn-sec" onclick="document.getElementById('p-import').click()">JSON 불러오기</button>
 </div>
 
 </div><!-- /panel-pricing -->
@@ -421,153 +411,231 @@ function onE(el){const ci=+el.dataset.c,mi=+el.dataset.m;const v=parseInt(el.val
 function renderPlanAll(){renderBars();renderCards();renderPS();renderEditor();renderWeekly()}
 
 /* ========================================================
-   PRICING TAB
+   PRICING TAB — 운영안 연동 구조
    ======================================================== */
 const P=(function(){
-    const CATS=['의류/잡화','영양제/식품','용품','장난감','기타'];
-    const CHS=[
-        {name:'자사몰',fee:0,color:'#2D5F2D'},
-        {name:'스마트스토어',fee:5.5,color:'#FF6B35'},
-        {name:'쿠팡',fee:10.8,color:'#E31837'},
-        {name:'무신사/29cm',fee:30,color:'#1a1a1a'},
-        {name:'해외(JP)',fee:15,color:'#1E90FF'},
-        {name:'B2B',fee:0,color:'#8B7355'}
-    ];
-    let past=[],nw=[];
-    const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-    const catOpts=s=>CATS.map(c=>'<option'+(c===s?' selected':'')+'>'+c+'</option>').join('');
     const fN=n=>n?Math.round(n).toLocaleString():'0';
     const fP=n=>n?n.toFixed(1)+'%':'0%';
+    const fW=n=>n>=1e8?(n/1e8).toFixed(2)+'억':n>=1e4?Math.round(n/1e4).toLocaleString()+'만':fN(n)+'원';
 
-    function calcPast(p){
-        const chD=p.price*p.chFee/100,pgD=p.price*p.pgFee/100,mktD=p.price*p.mktPct/100;
-        const net=p.price-chD-pgD;const cogsR=p.price>0?(p.cogs/p.price*100):0;
-        const cm=net-p.cogs-p.logistics-mktD;const cmR=p.price>0?(cm/p.price*100):0;
-        return{net,cogsR,cm,cmR};
-    }
-    function calcNew(p){
-        const totalD=p.chFee+p.pgFee+p.mktPct;const tCM=p.targetCM/100;
-        const rec=totalD<100?(p.cogs+p.logistics)/((1-totalD/100)-tCM):0;
-        const price=rec>0?Math.ceil(rec/100)*100:0;
-        const chD=price*p.chFee/100,pgD=price*p.pgFee/100,mktD=price*p.mktPct/100;
-        const net=price-chD-pgD;const cm=net-p.cogs-p.logistics-mktD;const cmR=price>0?(cm/price*100):0;
-        return{price,net,cm,cmR};
-    }
-    function benchmarks(){
-        const g={};
-        past.forEach(p=>{if(!p.price||!p.name)return;const c=calcPast(p);if(!g[p.cat])g[p.cat]={prices:[],cogsRs:[],cmRs:[],cms:[]};g[p.cat].prices.push(p.price);g[p.cat].cogsRs.push(c.cogsR);g[p.cat].cmRs.push(c.cmR);g[p.cat].cms.push(c.cm)});
-        const r={};for(const cat in g){const x=g[cat];const av=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;r[cat]={n:x.prices.length,avgPrice:av(x.prices),avgCogsR:av(x.cogsRs),avgCMR:av(x.cmRs),avgCM:av(x.cms)}}return r;
+    let products={
+        pat:{name:'더블히트 (패턴)',price:0,cogs:0,color:'#5B86E5',gradient:'linear-gradient(135deg,#5B86E5,#36D1DC)'},
+        sol:{name:'솔리드',price:0,cogs:0,color:'#FF6347',gradient:'linear-gradient(135deg,#FFA07A,#FF6347)'}
+    };
+
+    let chCosts=null;
+    function initCosts(){
+        if(chCosts)return;
+        chCosts={};
+        CH.forEach((c,i)=>{chCosts[i]={chFee:0,logistics:0,pgFee:3.5,mktPct:5,etc:0}});
+        chCosts[0].chFee=5.5; // 스스
+        chCosts[1].chFee=10.8; // 쿠팡
+        chCosts[2].chFee=0;    // 자사몰
+        chCosts[3].chFee=30;   // 무신사
+        chCosts[4].chFee=0;    // 오프라인
+        chCosts[5].chFee=15;   // 해외
+        chCosts[6].chFee=0;    // 페어
+        chCosts[7].chFee=0;    // B2B
     }
 
-    function renderPast(){
+    function getQty(ci){
+        const c=CH[ci];
+        const total=sum(c.monthly);
+        const pat=c.pat_qty;
+        const sol=total-pat;
+        return{pat,sol,total};
+    }
+
+    function calcCM(price,cogs,qty,costs){
+        const rev=price*qty;
+        const chD=rev*costs.chFee/100;
+        const pgD=rev*costs.pgFee/100;
+        const mktD=rev*costs.mktPct/100;
+        const logD=costs.logistics*qty;
+        const etcD=costs.etc*qty;
+        const totalCogs=cogs*qty;
+        const totalVar=chD+pgD+mktD+logD+etcD;
+        const cm=rev-totalCogs-totalVar;
+        const cmR=rev>0?(cm/rev*100):0;
+        return{rev,totalCogs,chD,pgD,mktD,logD,etcD,totalVar,cm,cmR};
+    }
+
+    function renderProducts(){
         let h='';
-        past.forEach(p=>{const c=calcPast(p);const cls=c.cm>=0?'cm-pos':'cm-neg';
-        h+='<tr><td><input class="pinp pinp-name" value="'+p.name+'" onchange="P.onP(\''+p.id+'\',\'name\',this)" placeholder="SKU명"></td>';
-        h+='<td><select class="pinp pinp-cat" onchange="P.onP(\''+p.id+'\',\'cat\',this)">'+catOpts(p.cat)+'</select></td>';
-        h+='<td><input class="pinp" value="'+(p.price||'')+'" onchange="P.onP(\''+p.id+'\',\'price\',this)" placeholder="0"></td>';
-        h+='<td><input class="pinp" value="'+(p.cogs||'')+'" onchange="P.onP(\''+p.id+'\',\'cogs\',this)" placeholder="0"></td>';
-        h+='<td><input class="pinp pinp-sm" value="'+(p.chFee||'')+'" onchange="P.onP(\''+p.id+'\',\'chFee\',this)"></td>';
-        h+='<td><input class="pinp" value="'+(p.logistics||'')+'" onchange="P.onP(\''+p.id+'\',\'logistics\',this)" placeholder="0"></td>';
-        h+='<td><input class="pinp pinp-sm" value="'+(p.pgFee||'')+'" onchange="P.onP(\''+p.id+'\',\'pgFee\',this)"></td>';
-        h+='<td><input class="pinp pinp-sm" value="'+(p.mktPct||'')+'" onchange="P.onP(\''+p.id+'\',\'mktPct\',this)"></td>';
-        h+='<td style="font-weight:700">'+fN(c.net)+'</td><td>'+fP(c.cogsR)+'</td>';
-        h+='<td class="'+cls+'">'+fN(c.cm)+'</td><td class="'+cls+'">'+fP(c.cmR)+'</td>';
-        h+='<td><button class="btn-danger" onclick="P.rmP(\''+p.id+'\')">X</button></td></tr>'});
-        document.getElementById('p-past-body').innerHTML=h;
-        const b=benchmarks();let fh='';
-        for(const cat in b){const x=b[cat];fh+='<tr class="avg-row"><td colspan="2">'+cat+' 평균 ('+x.n+'개)</td><td>'+fN(x.avgPrice)+'</td><td colspan="5"></td><td></td><td>'+fP(x.avgCogsR)+'</td><td class="cm-pos">'+fN(x.avgCM)+'</td><td class="cm-pos">'+fP(x.avgCMR)+'</td><td></td></tr>'}
-        document.getElementById('p-past-foot').innerHTML=fh;
+        ['pat','sol'].forEach(k=>{
+            const p=products[k];
+            h+='<div style="padding:20px;border-radius:12px;background:'+p.gradient+';color:#fff">';
+            h+='<div style="font-size:16px;font-weight:800;margin-bottom:12px">'+p.name+'</div>';
+            h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+            h+='<div><div style="font-size:10px;opacity:.8">판매가 (원)</div>';
+            h+='<input class="pinp" style="width:100%;background:rgba(255,255,255,.9);color:#333;font-size:16px;font-weight:800;padding:8px" value="'+(p.price||'')+'" placeholder="0" onfocus="this.select()" onchange="P.onProduct(\''+k+'\',\'price\',this)" onblur="P.onProduct(\''+k+'\',\'price\',this)"></div>';
+            h+='<div><div style="font-size:10px;opacity:.8">생산원가 (원)</div>';
+            h+='<input class="pinp" style="width:100%;background:rgba(255,255,255,.9);color:#333;font-size:16px;font-weight:800;padding:8px" value="'+(p.cogs||'')+'" placeholder="0" onfocus="this.select()" onchange="P.onProduct(\''+k+'\',\'cogs\',this)" onblur="P.onProduct(\''+k+'\',\'cogs\',this)"></div>';
+            h+='</div>';
+            const cogsR=p.price>0?(p.cogs/p.price*100):0;
+            const margin=p.price>0?((p.price-p.cogs)/p.price*100):0;
+            h+='<div style="margin-top:10px;display:flex;gap:16px;font-size:12px;opacity:.9">';
+            h+='<span>원가율 <b>'+fP(cogsR)+'</b></span>';
+            h+='<span>기본마진 <b>'+fP(margin)+'</b></span>';
+            const totalQty=CH.reduce((a,c,i)=>{const q=getQty(i);return a+(k==='pat'?q.pat:q.sol)},0);
+            h+='<span>운영안 수량 <b>'+fN(totalQty)+'장</b></span>';
+            h+='</div></div>';
+        });
+        document.getElementById('p-product-cards').innerHTML=h;
     }
-    function renderNew(){
-        let h='';
-        nw.forEach(p=>{const c=calcNew(p);const cls=c.cm>=0?'cm-pos':'cm-neg';
-        h+='<tr><td><input class="pinp pinp-name" value="'+p.name+'" onchange="P.onN(\''+p.id+'\',\'name\',this)" placeholder="신규SKU"></td>';
-        h+='<td><select class="pinp pinp-cat" onchange="P.onN(\''+p.id+'\',\'cat\',this)">'+catOpts(p.cat)+'</select></td>';
-        h+='<td><input class="pinp" value="'+(p.cogs||'')+'" onchange="P.onN(\''+p.id+'\',\'cogs\',this)" placeholder="0"></td>';
-        h+='<td><input class="pinp pinp-sm" value="'+(p.targetCM||'')+'" onchange="P.onN(\''+p.id+'\',\'targetCM\',this)"></td>';
-        h+='<td><input class="pinp pinp-sm" value="'+(p.chFee||'')+'" onchange="P.onN(\''+p.id+'\',\'chFee\',this)"></td>';
-        h+='<td><input class="pinp" value="'+(p.logistics||'')+'" onchange="P.onN(\''+p.id+'\',\'logistics\',this)" placeholder="0"></td>';
-        h+='<td><input class="pinp pinp-sm" value="'+(p.pgFee||'')+'" onchange="P.onN(\''+p.id+'\',\'pgFee\',this)"></td>';
-        h+='<td><input class="pinp pinp-sm" value="'+(p.mktPct||'')+'" onchange="P.onN(\''+p.id+'\',\'mktPct\',this)"></td>';
-        h+='<td style="font-weight:800;color:#FF6B35">'+fN(c.price)+'</td><td>'+fN(c.net)+'</td>';
-        h+='<td class="'+cls+'">'+fN(c.cm)+'</td><td class="'+cls+'">'+fP(c.cmR)+'</td>';
-        h+='<td><button class="btn-danger" onclick="P.rmN(\''+p.id+'\')">X</button></td></tr>'});
-        document.getElementById('p-new-body').innerHTML=h;
 
-        let det='';
-        nw.forEach(p=>{if(!p.cogs||!p.name)return;
-        det+='<div style="margin-top:20px"><div style="font-size:15px;font-weight:700;margin-bottom:10px">'+p.name+' — 채널별 시뮬레이션</div><div class="ch-compare">';
-        CHS.forEach(ch=>{const sim={...p,chFee:ch.fee};const c=calcNew(sim);
-        det+='<div class="ch-card" style="border-left-color:'+ch.color+'"><div class="ch-name">'+ch.name+'</div>';
-        det+='<div class="ch-row"><span class="ch-lbl">수수료</span><span class="ch-v">'+ch.fee+'%</span></div>';
-        det+='<div class="ch-row"><span class="ch-lbl">권장가</span><span class="ch-v" style="color:'+ch.color+'">'+fN(c.price)+'원</span></div>';
-        det+='<div class="ch-row"><span class="ch-lbl">CM</span><span class="ch-v '+(c.cm>=0?'cm-pos':'cm-neg')+'">'+fN(c.cm)+'원</span></div>';
-        det+='<div class="ch-row"><span class="ch-lbl">CM율</span><span class="ch-v '+(c.cm>=0?'cm-pos':'cm-neg')+'">'+fP(c.cmR)+'</span></div></div>'});
-        det+='</div></div>'});
-        document.getElementById('p-channel-detail').innerHTML=det;
+    function renderCosts(){
+        let h='';
+        CH.forEach((c,ci)=>{
+            if(c.short==='시딩')return;
+            const q=getQty(ci);const cc=chCosts[ci];
+            h+='<tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:6px"></span>'+c.short+'</td>';
+            h+='<td style="color:#5B86E5;font-weight:600">'+fN(q.pat)+'</td>';
+            h+='<td style="color:#FF6347;font-weight:600">'+fN(q.sol)+'</td>';
+            h+='<td style="font-weight:700">'+fN(q.total)+'</td>';
+            ['chFee','logistics','pgFee','mktPct','etc'].forEach(f=>{
+                h+='<td><input class="pinp pinp-sm" value="'+(cc[f]||'')+'" data-ci="'+ci+'" data-f="'+f+'" onfocus="this.select()" onchange="P.onCost(this)" onblur="P.onCost(this)"></td>';
+            });
+            h+='</tr>';
+        });
+        document.getElementById('p-cost-body').innerHTML=h;
     }
+
+    function renderCMResult(cogsMod,priceMod){
+        const cm0=cogsMod||0, pm0=priceMod||0;
+        let h='<table class="etbl"><thead><tr><th>채널</th><th>상품</th><th>수량</th><th>판매가</th><th>매출</th><th>생산원가</th><th>변동비합계</th><th style="color:#2D5F2D">CM</th><th style="color:#2D5F2D">CM율</th><th>장당CM</th></tr></thead><tbody>';
+        let grandRev=0,grandCM=0,grandQty=0;
+        const rows=[];
+
+        CH.forEach((c,ci)=>{
+            if(c.short==='시딩')return;
+            const q=getQty(ci);const cc=chCosts[ci];
+            ['pat','sol'].forEach(k=>{
+                const qty=k==='pat'?q.pat:q.sol;
+                if(qty===0)return;
+                const p=products[k];
+                const price=Math.round(p.price*(1+pm0/100));
+                const cogs=Math.round(p.cogs*(1+cm0/100));
+                const r=calcCM(price,cogs,qty,cc);
+                grandRev+=r.rev;grandCM+=r.cm;grandQty+=qty;
+                const cls=r.cm>=0?'cm-pos':'cm-neg';
+                const perUnit=qty>0?Math.round(r.cm/qty):0;
+                rows.push({ch:c.short,color:c.color,prod:products[k].name,qty,price,r,cls,perUnit});
+            });
+        });
+
+        rows.forEach(d=>{
+            h+='<tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+d.color+';margin-right:4px"></span>'+d.ch+'</td>';
+            h+='<td style="font-size:11px">'+d.prod+'</td>';
+            h+='<td>'+fN(d.qty)+'</td>';
+            h+='<td>'+fN(d.price)+'</td>';
+            h+='<td>'+fW(d.r.rev)+'</td>';
+            h+='<td>'+fW(d.r.totalCogs)+'</td>';
+            h+='<td style="font-size:11px;color:#888">'+fW(d.r.totalVar)+'</td>';
+            h+='<td class="'+d.cls+'" style="font-size:13px">'+fW(d.r.cm)+'</td>';
+            h+='<td class="'+d.cls+'">'+fP(d.r.cmR)+'</td>';
+            h+='<td style="font-weight:600">'+fN(d.perUnit)+'</td></tr>';
+        });
+
+        const grandCMR=grandRev>0?(grandCM/grandRev*100):0;
+        const perUnit=grandQty>0?Math.round(grandCM/grandQty):0;
+        h+='<tr class="sep-row"><td colspan="2"><b>합계</b></td>';
+        h+='<td><b>'+fN(grandQty)+'</b></td><td></td>';
+        h+='<td><b>'+fW(grandRev)+'</b></td><td></td><td></td>';
+        h+='<td class="'+(grandCM>=0?'cm-pos':'cm-neg')+'" style="font-size:14px"><b>'+fW(grandCM)+'</b></td>';
+        h+='<td class="'+(grandCM>=0?'cm-pos':'cm-neg')+'"><b>'+fP(grandCMR)+'</b></td>';
+        h+='<td style="font-weight:700"><b>'+fN(perUnit)+'</b></td></tr>';
+        h+='</tbody></table>';
+        document.getElementById('p-cm-result').innerHTML=h;
+
+        const chSummary={};
+        rows.forEach(d=>{if(!chSummary[d.ch])chSummary[d.ch]={cm:0,rev:0};chSummary[d.ch].cm+=d.r.cm;chSummary[d.ch].rev+=d.r.rev});
+        const ranked=Object.entries(chSummary).sort((a,b)=>b[1].cm-a[1].cm);
+        let ins='<b>CM TOP 3:</b> ';
+        ranked.slice(0,3).forEach(([ch,v],i)=>{ins+=(i+1)+'. '+ch+' '+fW(v.cm)+' ('+fP(grandCM>0?v.cm/grandCM*100:0)+') &nbsp;'});
+        if(grandCM<0)ins+='<br><b style="color:#E31837">경고: 총 공헌이익이 마이너스입니다. 판매가 또는 원가를 조정하세요.</b>';
+        document.getElementById('p-cm-insight').innerHTML=ins;
+
+        document.getElementById('p-rev').textContent=fW(grandRev);
+        document.getElementById('p-cm').textContent=fW(grandCM);
+        document.getElementById('p-cmr').textContent=fP(grandCMR);
+        document.getElementById('p-cmunit').textContent=fN(perUnit);
+
+        return{grandRev,grandCM,grandCMR,grandQty};
+    }
+
     function renderScenario(){
-        const sel=document.getElementById('sc-target');let opts='';
-        nw.forEach(p=>{if(p.name)opts+='<option value="'+p.id+'">'+p.name+'</option>'});
-        if(!opts)opts='<option value="">신규 제품 먼저 추가</option>';
-        sel.innerHTML=opts;
-        const p=nw.find(x=>x.id===sel.value);
-        if(!p||!p.cogs){document.getElementById('sc-cards').innerHTML='<div style="color:#888;grid-column:1/-1;text-align:center;padding:40px">신규 제품 탭에서 제품과 원가를 입력하세요</div>';document.getElementById('sc-detail').innerHTML='';return}
-        const sv=parseInt(document.getElementById('sc-slider').value);
-        document.getElementById('sc-pct').textContent=(sv>=0?'+':'')+sv+'%';
-        const scenarios=[{l:'원가 -20%',p:-20,bg:'#E8F5E9'},{l:'원가 -10%',p:-10,bg:'#F0FAF0'},{l:'현행',p:0,bg:'#FFFEF5'},{l:'원가 +10%',p:10,bg:'#FFF8F0'},{l:'원가 +20%',p:20,bg:'#FDE8E8'},{l:'커스텀 ('+sv+'%)',p:sv,bg:'#EBF3FE'}];
-        let h='';
-        scenarios.forEach(s=>{const nc=p.cogs*(1+s.p/100);const c=calcNew({...p,cogs:nc});
-        h+='<div class="sc-card'+(s.p===sv?' sc-active':'')+'" style="background:'+s.bg+'"><div class="sc-label">'+s.l+'</div><div class="sc-val" style="color:'+(c.cm>=0?'#2D5F2D':'#E31837')+'">'+fN(c.price)+'<span style="font-size:12px">원</span></div><div class="sc-sub">원가 '+fN(nc)+'원 | CM '+fN(c.cm)+'원 ('+fP(c.cmR)+')</div></div>'});
-        document.getElementById('sc-cards').innerHTML=h;
+        const cogsPct=parseInt(document.getElementById('sc-cogs').value)||0;
+        const pricePct=parseInt(document.getElementById('sc-price').value)||0;
+        document.getElementById('sc-cogs-v').textContent=(cogsPct>=0?'+':'')+cogsPct+'%';
+        document.getElementById('sc-price-v').textContent=(pricePct>=0?'+':'')+pricePct+'%';
 
-        const bc=p.cogs*(1+sv/100);
-        let d='<div style="font-size:14px;font-weight:700;margin-bottom:12px">원가 '+(sv>=0?'+':'')+sv+'% 적용 시 채널별</div><table class="etbl"><thead><tr><th>채널</th><th>수수료%</th><th>변동원가</th><th>권장판매가</th><th>CM</th><th>CM율</th><th>현행대비</th></tr></thead><tbody>';
-        CHS.forEach(ch=>{const base=calcNew({...p,chFee:ch.fee});const adj=calcNew({...p,cogs:bc,chFee:ch.fee});const diff=adj.cm-base.cm;
-        d+='<tr><td style="font-weight:600">'+ch.name+'</td><td>'+ch.fee+'%</td><td>'+fN(bc)+'</td><td style="font-weight:700">'+fN(adj.price)+'</td><td class="'+(adj.cm>=0?'cm-pos':'cm-neg')+'">'+fN(adj.cm)+'</td><td class="'+(adj.cm>=0?'cm-pos':'cm-neg')+'">'+fP(adj.cmR)+'</td><td class="'+(diff>=0?'cm-pos':'cm-neg')+'">'+(diff>=0?'+':'')+fN(diff)+'</td></tr>'});
+        const base=renderCMResult(0,0);
+        const scenarios=[
+            {l:'현행',cg:0,pr:0,bg:'#FFFEF5'},
+            {l:'원가 '+(cogsPct>=0?'+':'')+cogsPct+'%',cg:cogsPct,pr:0,bg:cogsPct<0?'#E8F5E9':'#FDE8E8'},
+            {l:'판매가 '+(pricePct>=0?'+':'')+pricePct+'%',cg:0,pr:pricePct,bg:pricePct>0?'#E8F5E9':'#FFF0E5'},
+            {l:'원가+판매가 동시',cg:cogsPct,pr:pricePct,bg:'#EBF3FE'}
+        ];
+
+        let h='';
+        scenarios.forEach(s=>{
+            let gRev=0,gCM=0,gQty=0;
+            CH.forEach((c,ci)=>{
+                if(c.short==='시딩')return;
+                const q=getQty(ci);const cc=chCosts[ci];
+                ['pat','sol'].forEach(k=>{
+                    const qty=k==='pat'?q.pat:q.sol;if(!qty)return;
+                    const p=products[k];
+                    const price=Math.round(p.price*(1+s.pr/100));
+                    const cogs=Math.round(p.cogs*(1+s.cg/100));
+                    const r=calcCM(price,cogs,qty,cc);
+                    gRev+=r.rev;gCM+=r.cm;gQty+=qty;
+                });
+            });
+            const diff=gCM-base.grandCM;
+            h+='<div class="sc-card'+(s.cg===cogsPct&&s.pr===pricePct?' sc-active':'')+'" style="background:'+s.bg+'">';
+            h+='<div class="sc-label">'+s.l+'</div>';
+            h+='<div class="sc-val" style="color:'+(gCM>=0?'#2D5F2D':'#E31837')+'">'+fW(gCM)+'</div>';
+            h+='<div class="sc-sub">'+(diff>=0?'+':'')+fW(diff)+' vs 현행 | CM율 '+fP(gRev>0?gCM/gRev*100:0)+'</div></div>';
+        });
+        document.getElementById('sc-scenarios').innerHTML=h;
+
+        if(cogsPct===0&&pricePct===0){document.getElementById('sc-detail').innerHTML='<div style="text-align:center;color:#888;padding:20px">슬라이더를 조정하면 상세 비교가 표시됩니다</div>';return}
+
+        let d='<div style="font-size:14px;font-weight:700;margin-bottom:12px">변동 적용: 원가 '+(cogsPct>=0?'+':'')+cogsPct+'% / 판매가 '+(pricePct>=0?'+':'')+pricePct+'%</div>';
+        d+='<table class="etbl"><thead><tr><th>채널</th><th>상품</th><th>현행CM</th><th>변동CM</th><th>차이</th><th>변동CM율</th></tr></thead><tbody>';
+        CH.forEach((c,ci)=>{
+            if(c.short==='시딩')return;
+            const q=getQty(ci);const cc=chCosts[ci];
+            ['pat','sol'].forEach(k=>{
+                const qty=k==='pat'?q.pat:q.sol;if(!qty)return;
+                const p=products[k];
+                const baseR=calcCM(p.price,p.cogs,qty,cc);
+                const adjR=calcCM(Math.round(p.price*(1+pricePct/100)),Math.round(p.cogs*(1+cogsPct/100)),qty,cc);
+                const diff=adjR.cm-baseR.cm;
+                d+='<tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:4px"></span>'+c.short+'</td>';
+                d+='<td style="font-size:11px">'+products[k].name+'</td>';
+                d+='<td>'+fW(baseR.cm)+'</td>';
+                d+='<td class="'+(adjR.cm>=0?'cm-pos':'cm-neg')+'">'+fW(adjR.cm)+'</td>';
+                d+='<td class="'+(diff>=0?'cm-pos':'cm-neg')+'">'+(diff>=0?'+':'')+fW(diff)+'</td>';
+                d+='<td class="'+(adjR.cmR>=0?'cm-pos':'cm-neg')+'">'+fP(adjR.cmR)+'</td></tr>';
+            });
+        });
         d+='</tbody></table>';
         document.getElementById('sc-detail').innerHTML=d;
     }
-    function renderCompare(){
-        const b=benchmarks();const newByCat={};
-        nw.forEach(p=>{if(!p.cogs||!p.name)return;const c=calcNew(p);if(!newByCat[p.cat])newByCat[p.cat]=[];newByCat[p.cat].push({...p,...c})});
-        let h='';const allCats=[...new Set([...Object.keys(b),...Object.keys(newByCat)])];
-        if(!allCats.length){h='<div style="text-align:center;color:#888;padding:40px">과거/신규 제품을 먼저 입력하세요</div>'}
-        allCats.forEach(cat=>{const bx=b[cat];
-        h+='<div style="margin-bottom:24px"><div style="font-size:16px;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee">'+cat+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-        h+='<div style="padding:14px;background:#EBF3FE;border-radius:10px"><div style="font-size:13px;font-weight:700;color:#5B86E5;margin-bottom:8px">과거 평균</div>';
-        if(bx){h+='<div style="font-size:12px"><b>수:</b> '+bx.n+'개 | <b>평균가:</b> '+fN(bx.avgPrice)+'원 | <b>원가율:</b> '+fP(bx.avgCogsR)+'</div><div style="font-size:14px;font-weight:800;color:#2D5F2D;margin-top:4px">CM율: '+fP(bx.avgCMR)+'</div>'}else{h+='<div style="color:#aaa">-</div>'}
-        h+='</div><div style="padding:14px;background:#FFF0E5;border-radius:10px"><div style="font-size:13px;font-weight:700;color:#FF6B35;margin-bottom:8px">신규 제품</div>';
-        const nl=newByCat[cat];
-        if(nl&&nl.length){nl.forEach(n=>{const gap=bx?(n.cmR-bx.avgCMR):0;h+='<div style="padding:4px 0;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font-size:12px;font-weight:600">'+n.name+'</div><div style="font-size:12px">원가 '+fN(n.cogs)+'원 → 판매가 '+fN(n.price)+'원</div><div style="font-size:14px;font-weight:800;color:'+(n.cm>=0?'#2D5F2D':'#E31837')+'">CM율: '+fP(n.cmR);if(bx)h+=' <span style="font-size:11px;color:'+(gap>=0?'#2D5F2D':'#E31837')+'">(벤치 대비 '+(gap>=0?'+':'')+gap.toFixed(1)+'%p)</span>';h+='</div></div>'})}else{h+='<div style="color:#aaa">-</div>'}
-        h+='</div></div></div>'});
-        document.getElementById('p-compare').innerHTML=h;
-    }
-    function renderKPI(){
-        const vp=past.filter(x=>x.price&&x.name);
-        document.getElementById('p-past').textContent=vp.length;
-        document.getElementById('p-avgcm').textContent=vp.length?fP(vp.reduce((a,x)=>a+calcPast(x).cmR,0)/vp.length):'-';
-        const vn=nw.filter(x=>x.cogs&&x.name);
-        document.getElementById('p-new').textContent=vn.length;
-        document.getElementById('p-newcm').textContent=vn.length?fP(vn.reduce((a,x)=>a+calcNew(x).cmR,0)/vn.length):'-';
-        document.getElementById('pricing-count').textContent=vp.length+vn.length;
-    }
-    function save(){localStorage.setItem('dh_past',JSON.stringify(past));localStorage.setItem('dh_new',JSON.stringify(nw))}
-    function load(){try{const a=localStorage.getItem('dh_past');const b=localStorage.getItem('dh_new');if(a)past=JSON.parse(a);if(b)nw=JSON.parse(b)}catch(e){}}
+
+    function save(){localStorage.setItem('dh_products',JSON.stringify(products));localStorage.setItem('dh_chcosts',JSON.stringify(chCosts))}
+    function load(){try{const a=localStorage.getItem('dh_products');const b=localStorage.getItem('dh_chcosts');if(a){const d=JSON.parse(a);products.pat.price=d.pat.price||0;products.pat.cogs=d.pat.cogs||0;products.sol.price=d.sol.price||0;products.sol.cogs=d.sol.cogs||0}if(b)chCosts=JSON.parse(b)}catch(e){}}
 
     return{
-        addPast(){past.push({id:uid(),name:'',cat:'의류/잡화',price:0,cogs:0,chFee:5.5,logistics:0,pgFee:3.5,mktPct:5});this.renderAll()},
-        addPastBulk(){for(let i=0;i<5;i++)past.push({id:uid(),name:'',cat:'의류/잡화',price:0,cogs:0,chFee:5.5,logistics:0,pgFee:3.5,mktPct:5});this.renderAll()},
-        addNew(){nw.push({id:uid(),name:'',cat:'의류/잡화',cogs:0,targetCM:30,chFee:5.5,logistics:0,pgFee:3.5,mktPct:5});this.renderAll()},
-        rmP(id){past=past.filter(x=>x.id!==id);this.renderAll()},
-        rmN(id){nw=nw.filter(x=>x.id!==id);this.renderAll()},
-        onP(id,f,el){const p=past.find(x=>x.id===id);if(!p)return;if(f==='name'||f==='cat')p[f]=el.value;else p[f]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
-        onN(id,f,el){const p=nw.find(x=>x.id===id);if(!p)return;if(f==='name'||f==='cat')p[f]=el.value;else p[f]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
-        renderScenario,
-        renderAll(){renderPast();renderNew();renderScenario();renderCompare();renderKPI();save()},
-        exportData(){const d=JSON.stringify({pastProducts:past,newProducts:nw},null,2);const b=new Blob([d],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='pricing_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('JSON 내보내기 완료')},
-        handleImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.pastProducts)past=d.pastProducts;if(d.newProducts)nw=d.newProducts;P.renderAll();toast('불러오기 완료')}catch(err){toast('파싱 실패')}};r.readAsText(f);e.target.value=''},
-        init(){load();renderKPI();document.getElementById('pricing-count').textContent=past.length+nw.length}
+        onProduct(k,f,el){products[k][f]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
+        onCost(el){const ci=+el.dataset.ci;const f=el.dataset.f;chCosts[ci][f]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
+        renderAll(){initCosts();renderProducts();renderCosts();renderCMResult();renderScenario();save()},
+        exportData(){const d=JSON.stringify({products,chCosts,channels:CH.map((c,i)=>({name:c.short,...getQty(i)}))},null,2);const b=new Blob([d],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='pricing_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('JSON 내보내기 완료')},
+        handleImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.products){products.pat.price=d.products.pat.price||0;products.pat.cogs=d.products.pat.cogs||0;products.sol.price=d.products.sol.price||0;products.sol.cogs=d.products.sol.cogs||0}if(d.chCosts)chCosts=d.chCosts;P.renderAll();toast('불러오기 완료')}catch(err){toast('파싱 실패')}};r.readAsText(f);e.target.value=''},
+        init(){load();initCosts()}
     };
 })();
 
