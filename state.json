@@ -76,15 +76,17 @@
     0
   ],
   "pricing": {
+    "usd_pat": 6,
+    "usd_sol": 6.3,
     "old_pat_retail": 54000,
     "old_pat_price": 45900,
     "old_pat_cogs": 11500,
     "old_sol_retail": 54000,
     "old_sol_price": 45900,
     "old_sol_cogs": 11500,
-    "new_pat_retail": 48900,
-    "new_pat_price": 48900,
-    "new_pat_cogs": 15200,
+    "new_pat_retail": 49900,
+    "new_pat_price": 49900,
+    "new_pat_cogs": 12597,
     "new_sol_retail": 55000,
     "new_sol_price": 46900,
     "new_sol_cogs": 12500,
@@ -110,5 +112,5 @@
     }
   },
   "saved_by": "김상아",
-  "saved_at": "2026-06-11 10:55"
+  "saved_at": "2026-06-11 11:53"
 }
