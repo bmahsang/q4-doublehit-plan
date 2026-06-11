@@ -322,16 +322,16 @@ let _ghSha=null;
 
 function getToken(){return localStorage.getItem('gh_tok')}
 function setToken(t){localStorage.setItem('gh_tok',t)}
-function resetAll(){if(!confirm('초기값으로 되돌릴까요?'))return;CH.forEach((c,i)=>{c.monthly=[...ORIG[i]];c.pat_qty=ORIG_P[i];c.big_qty=ORIG_B[i]||0;c.sbig_qty=ORIG_SB[i]||0});renderPlanAll()}
+function resetAll(){if(!confirm('초기값으로 되돌릴까요?'))return;CH.forEach((c,i)=>{c.monthly=[...ORIG[i]];c.pat_qty=ORIG_P[i];c.big_qty=ORIG_B[i]||0;c.sbig_qty=ORIG_SB[i]||0;c.sol_extra=0;c.sbig_extra=0});renderPlanAll()}
 
 async function loadFromGH(){
-    try{const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master&t='+Date.now());if(!r.ok)return false;const d=await r.json();_ghSha=d.sha;const s=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));s.monthly.forEach((row,i)=>{if(CH[i])CH[i].monthly=row});s.pat_qty.forEach((v,i)=>{if(CH[i])CH[i].pat_qty=v});if(s.big_qty)s.big_qty.forEach((v,i)=>{if(CH[i])CH[i].big_qty=v});if(s.sbig_qty)s.sbig_qty.forEach((v,i)=>{if(CH[i])CH[i].sbig_qty=v});if(s.pricing)P.setState(s.pricing);const b=document.getElementById('share-banner');if(s.saved_by&&s.saved_by!=='initial'){b.innerHTML='<span class="sb-who">'+s.saved_by+'</span> 님이 마지막 저장<span class="sb-time">'+s.saved_at+'</span>';b.style.display='block'}return true}catch(e){return false}
+    try{const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master&t='+Date.now());if(!r.ok)return false;const d=await r.json();_ghSha=d.sha;const s=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));s.monthly.forEach((row,i)=>{if(CH[i])CH[i].monthly=row});s.pat_qty.forEach((v,i)=>{if(CH[i])CH[i].pat_qty=v});if(s.big_qty)s.big_qty.forEach((v,i)=>{if(CH[i])CH[i].big_qty=v});if(s.sbig_qty)s.sbig_qty.forEach((v,i)=>{if(CH[i])CH[i].sbig_qty=v});if(s.sol_extra)s.sol_extra.forEach((v,i)=>{if(CH[i])CH[i].sol_extra=v});if(s.sbig_extra)s.sbig_extra.forEach((v,i)=>{if(CH[i])CH[i].sbig_extra=v});if(s.pricing)P.setState(s.pricing);const b=document.getElementById('share-banner');if(s.saved_by&&s.saved_by!=='initial'){b.innerHTML='<span class="sb-who">'+s.saved_by+'</span> 님이 마지막 저장<span class="sb-time">'+s.saved_at+'</span>';b.style.display='block'}return true}catch(e){return false}
 }
 async function saveToGH(){
     let token=getToken();if(!token){token=prompt('팀 토큰을 입력하세요 (최초 1회만 입력)');if(!token)return;setToken(token)}
     const name=prompt('저장자 이름을 입력하세요 (예: 홍길동)');if(!name)return;
     const now=new Date();const ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    const state={monthly:CH.map(c=>c.monthly),pat_qty:CH.map(c=>c.pat_qty),big_qty:CH.map(c=>c.big_qty||0),sbig_qty:CH.map(c=>c.sbig_qty||0),pricing:P.getState(),saved_by:name,saved_at:ts};
+    const state={monthly:CH.map(c=>c.monthly),pat_qty:CH.map(c=>c.pat_qty),big_qty:CH.map(c=>c.big_qty||0),sbig_qty:CH.map(c=>c.sbig_qty||0),sol_extra:CH.map(c=>c.sol_extra||0),sbig_extra:CH.map(c=>c.sbig_extra||0),pricing:P.getState(),saved_by:name,saved_at:ts};
     const body=btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2))));
     try{if(!_ghSha){const gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master',{headers:{'Authorization':'token '+token}});if(gr.ok){const gd=await gr.json();_ghSha=gd.sha}}
     const pr=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json',{method:'PUT',headers:{'Authorization':'token '+token,'Content-Type':'application/json'},body:JSON.stringify({message:name+' saved ('+ts+')',content:body,sha:_ghSha,branch:'master'})});
@@ -360,39 +360,43 @@ function renderCards(){
     document.getElementById('cm-insight').innerHTML=ins;
     document.getElementById('s-qty').textContent=gt.toLocaleString();document.getElementById('s-cm').textContent=fCM(gcm);
     const tP=sum(CH.map(c=>c.pat_qty));const tB=sum(CH.map(c=>c.big_qty||0));const tSB=sum(CH.map(c=>c.sbig_qty||0));const tS=gt-tP-tB-tSB;
-    document.getElementById('s-ps').textContent='패턴 '+tP.toLocaleString()+' / 패턴대형 '+tB.toLocaleString()+' / 솔리드 '+tS.toLocaleString()+' / 솔리드대형 '+tSB.toLocaleString();
-    document.getElementById('s-ps2').textContent='패턴 '+(gt>0?((tP+tB)/gt*100).toFixed(0):'0')+'% / 솔리드 '+(gt>0?((tS+tSB)/gt*100).toFixed(0):'0')+'%';
+    const tSE=sum(CH.map(c=>c.sol_extra||0));const tSBE=sum(CH.map(c=>c.sbig_extra||0));
+    document.getElementById('s-ps').textContent='패턴 '+(tP+tB).toLocaleString()+' / 솔리드 '+(tS+tSB).toLocaleString()+(tSE+tSBE>0?' (+추가'+(tSE+tSBE).toLocaleString()+')':'');
+    document.getElementById('s-ps2').textContent='패턴 '+(gt>0?((tP+tB)/gt*100).toFixed(0):'0')+'% / 솔리드 '+(gt>0?((tS+tSB+tSE+tSBE)/(gt+tSE+tSBE)*100).toFixed(0):'0')+'%';
     document.getElementById('s-nov').textContent='전체의 '+(gt>0?(sum(CH.map(c=>c.monthly[2]))/gt*100).toFixed(0):'0')+'%';
 }
 function renderPS(){
-    const gt=sum(CH.map(c=>sum(c.monthly)));const tP=sum(CH.map(c=>c.pat_qty));const tB=sum(CH.map(c=>c.big_qty||0));const tSB=sum(CH.map(c=>c.sbig_qty||0));const tS=gt-tP-tB-tSB;const patLeft=PAT_MAX-tP-tB,solLeft=SOL_MAX-tS-tSB;
+    const gt0=sum(CH.map(c=>sum(c.monthly)));const tP=sum(CH.map(c=>c.pat_qty));const tB=sum(CH.map(c=>c.big_qty||0));const tSB=sum(CH.map(c=>c.sbig_qty||0));const tS=gt0-tP-tB-tSB;
+    const tSE=sum(CH.map(c=>c.sol_extra||0));const tSBE=sum(CH.map(c=>c.sbig_extra||0));
+    const patAll=tP+tB,solBase=tS+tSB,solAll=solBase+tSE+tSBE;const patLeft=PAT_MAX-patAll,solLeft=SOL_MAX-solAll;
     let h='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
-    [{l:'패턴',c:'#5B86E5',v:tP,mx:PAT_MAX,left:patLeft},{l:'패턴 대형견',c:'#8B5CF6',v:tB,r:(tP+tB>0?tB/(tP+tB)*100:0)},{l:'솔리드',c:'#FF6347',v:tS,mx:SOL_MAX,left:solLeft},{l:'솔리드 대형견',c:'#E67E22',v:tSB,r:(tS+tSB>0?tSB/(tS+tSB)*100:0)}].forEach(d=>{
-        const over=d.left!==undefined&&d.left<0;
-        h+='<div style="padding:12px;background:'+(over?'#FDE8E8':'#f9f9f9')+';border-radius:10px;border:2px solid '+(over?'#E31837':'transparent')+'">';
-        h+='<div style="font-weight:700;color:'+d.c+';font-size:13px">'+d.l+'</div>';
-        h+='<div style="font-size:24px;font-weight:800;color:'+(over?'#E31837':d.c)+'">'+d.v.toLocaleString()+'<span style="font-size:12px;font-weight:600">장</span></div>';
-        if(d.mx){h+='<div style="font-size:11px;color:'+(over?'#E31837':'#666')+'">MAX '+d.mx.toLocaleString()+' / 잔여 '+d.left.toLocaleString()+(over?' !!':'')+'</div>'}
-        else{h+='<div style="font-size:11px;color:#666">대형견 비중 '+d.r.toFixed(1)+'%</div>'}
-        h+='</div>';
-    });
+    h+='<div style="padding:12px;background:'+(patLeft<0?'#FDE8E8':'#f9f9f9')+';border-radius:10px;border:2px solid '+(patLeft<0?'#E31837':'transparent')+'"><div style="font-weight:700;color:#5B86E5;font-size:13px">패턴계 (잠금)</div><div style="font-size:24px;font-weight:800;color:'+(patLeft<0?'#E31837':'#5B86E5')+'">'+patAll.toLocaleString()+'<span style="font-size:12px;font-weight:600">장</span></div><div style="font-size:11px;color:'+(patLeft<0?'#E31837':'#666')+'">MAX '+PAT_MAX.toLocaleString()+' / 잔여 '+patLeft.toLocaleString()+(patLeft<0?' !!':'')+'</div></div>';
+    h+='<div style="padding:12px;background:#f9f9f9;border-radius:10px"><div style="font-weight:700;color:#8B5CF6;font-size:13px">대형견 비중</div><div style="font-size:20px;font-weight:800;color:#8B5CF6">패턴 '+(patAll>0?(tB/patAll*100).toFixed(1):'0')+'%</div><div style="font-size:13px;font-weight:700;color:#E67E22">솔리드 '+(solAll>0?((tSB+tSBE)/solAll*100).toFixed(1):'0')+'%</div></div>';
+    h+='<div style="padding:12px;background:'+(solLeft<0?'#FDE8E8':'#f9f9f9')+';border-radius:10px;border:2px solid '+(solLeft<0?'#E31837':'transparent')+'"><div style="font-weight:700;color:#FF6347;font-size:13px">솔리드계 (기본+추가)</div><div style="font-size:24px;font-weight:800;color:'+(solLeft<0?'#E31837':'#FF6347')+'">'+solAll.toLocaleString()+'<span style="font-size:12px;font-weight:600">장</span></div><div style="font-size:11px;color:'+(solLeft<0?'#E31837':'#666')+'">MAX '+SOL_MAX.toLocaleString()+' / 잔여 '+solLeft.toLocaleString()+(solLeft<0?' !!':'')+'</div></div>';
+    h+='<div style="padding:12px;background:#E8F5E9;border-radius:10px;border:2px solid #C8E6C9"><div style="font-weight:700;color:#2D5F2D;font-size:13px">솔리드 추가분</div><div style="font-size:24px;font-weight:800;color:#2D5F2D">+'+(tSE+tSBE).toLocaleString()+'<span style="font-size:12px;font-weight:600">장</span></div><div style="font-size:11px;color:#666">소형 +'+tSE.toLocaleString()+' / 대형 +'+tSBE.toLocaleString()+'</div></div>';
     h+='</div>';
-    h+='<table class="etbl"><thead><tr><th>채널</th><th>총량</th><th style="color:#5B86E5">패턴</th><th style="color:#8B5CF6">패턴 대형견</th><th style="color:#E67E22">솔리드 대형견</th><th style="color:#FF6347">솔리드</th><th style="width:120px">비율</th><th style="text-align:left">메모</th></tr></thead><tbody>';
-    CH.forEach((c,ci)=>{const t=sum(c.monthly);const p=c.pat_qty;const b=c.big_qty||0;const sb=c.sbig_qty||0;const s=t-p-b-sb;
-    h+='<tr style="border-bottom:1px solid #eee"><td style="padding:6px;font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:4px"></span>'+c.short+'</td><td style="text-align:center;font-weight:600">'+t.toLocaleString()+'</td>';
-    h+='<td style="text-align:center"><input type="text" class="ei'+(p!==ORIG_P[ci]?' changed':'')+'" style="width:55px" value="'+p.toLocaleString()+'" data-ci="'+ci+'" data-type="pat" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
-    h+='<td style="text-align:center"><input type="text" class="ei'+(b!==(ORIG_B[ci]||0)?' changed':'')+'" style="width:55px" value="'+b.toLocaleString()+'" data-ci="'+ci+'" data-type="big" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
-    h+='<td style="text-align:center"><input type="text" class="ei'+(sb!==(ORIG_SB[ci]||0)?' changed':'')+'" style="width:55px" value="'+sb.toLocaleString()+'" data-ci="'+ci+'" data-type="sbig" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
-    h+='<td style="text-align:center;color:#FF6347;font-weight:700;font-size:12px">'+s.toLocaleString()+'</td>';
-    const ppP=t>0?Math.round(p/t*100):0;const ppB=t>0?Math.round(b/t*100):0;const ppSB=t>0?Math.round(sb/t*100):0;const ppS=Math.max(0,100-ppP-ppB-ppSB);
-    h+='<td><div style="display:flex;height:12px;border-radius:6px;overflow:hidden">';
-    if(ppP>0)h+='<div style="width:'+ppP+'%;background:#5B86E5"></div>';if(ppB>0)h+='<div style="width:'+ppB+'%;background:#8B5CF6"></div>';if(ppSB>0)h+='<div style="width:'+ppSB+'%;background:#E67E22"></div>';if(ppS>0)h+='<div style="width:'+ppS+'%;background:#FF6347"></div>';
-    h+='</div></td><td style="font-size:10px;color:#666;padding-left:8px">'+c.pat_note+'</td></tr>'});
-    h+='<tr style="border-top:2px solid #333;font-weight:700;background:#f9f9f4"><td style="padding:6px">합계</td><td style="text-align:center">'+gt.toLocaleString()+'</td><td style="text-align:center;color:#5B86E5">'+tP.toLocaleString()+'</td><td style="text-align:center;color:#8B5CF6">'+tB.toLocaleString()+'</td><td style="text-align:center;color:#E67E22">'+tSB.toLocaleString()+'</td><td style="text-align:center;color:#FF6347">'+tS.toLocaleString()+'</td>';
-    h+='<td colspan="2" style="font-size:10px;color:#666;padding-left:8px">패턴 '+(gt>0?Math.round(tP/gt*100):0)+'% / 패턴대형 '+(gt>0?Math.round(tB/gt*100):0)+'% / 솔리드대형 '+(gt>0?Math.round(tSB/gt*100):0)+'% / 솔리드 '+(gt>0?Math.round(tS/gt*100):0)+'%</td></tr></tbody></table>';
+    h+='<table class="etbl"><thead><tr><th>채널</th><th>총량</th><th style="color:#5B86E5;width:55px">패턴%</th><th style="color:#5B86E5">패턴</th><th style="color:#8B5CF6">패대</th><th style="color:#FF6347">솔</th><th style="color:#E67E22">솔대</th><th style="color:#2D5F2D;background:#F0FAF0">+솔추가</th><th style="color:#2D5F2D;background:#F0FAF0">+대형추가</th><th>최종</th></tr></thead><tbody>';
+    CH.forEach((c,ci)=>{const t=sum(c.monthly);if(c.short==='시딩'&&t===0)return;const p=c.pat_qty;const b=c.big_qty||0;const sb=c.sbig_qty||0;const s=t-p-b-sb;const pct=t>0?Math.round((p+b)/t*100):0;const se=c.sol_extra||0;const sbe=c.sbig_extra||0;const ft=t+se+sbe;
+    h+='<tr style="border-bottom:1px solid #eee"><td style="padding:5px;font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:4px"></span>'+c.short+'</td>';
+    h+='<td style="text-align:center;font-weight:600;font-size:12px">'+t.toLocaleString()+'</td>';
+    h+='<td style="text-align:center"><input type="text" class="ei" style="width:38px;text-align:right" value="'+pct+'" data-ci="'+ci+'" onfocus="this.select()" onchange="onPatPct(this)" onblur="onPatPct(this)"><span style="font-size:10px;color:#888">%</span></td>';
+    h+='<td style="text-align:center;color:#5B86E5;font-weight:600;font-size:12px;background:#f8f8ff">'+p.toLocaleString()+'</td>';
+    h+='<td style="text-align:center;color:#8B5CF6;font-weight:600;font-size:12px;background:#f8f8ff">'+b.toLocaleString()+'</td>';
+    h+='<td style="text-align:center;color:#FF6347;font-weight:600;font-size:12px">'+s.toLocaleString()+'</td>';
+    h+='<td style="text-align:center;color:#E67E22;font-weight:600;font-size:12px">'+sb.toLocaleString()+'</td>';
+    h+='<td style="text-align:center;background:#F0FAF0"><input type="text" class="ei" style="width:50px" value="'+(se||'')+'" placeholder="0" data-ci="'+ci+'" data-type="sol" onfocus="this.select()" onchange="onSolExtra(this)" onblur="onSolExtra(this)"></td>';
+    h+='<td style="text-align:center;background:#F0FAF0"><input type="text" class="ei" style="width:50px" value="'+(sbe||'')+'" placeholder="0" data-ci="'+ci+'" data-type="sbig" onfocus="this.select()" onchange="onSolExtra(this)" onblur="onSolExtra(this)"></td>';
+    h+='<td style="text-align:center;font-weight:700;font-size:12px">'+(se+sbe>0?'<span style="color:#2D5F2D">'+ft.toLocaleString()+'</span>':ft.toLocaleString())+'</td></tr>'});
+    const gt=gt0+tSE+tSBE;
+    h+='<tr style="border-top:2px solid #333;font-weight:700;background:#f9f9f4"><td style="padding:5px">합계</td><td style="text-align:center">'+gt0.toLocaleString()+'</td><td style="text-align:center">'+(gt0>0?Math.round(patAll/gt0*100):0)+'%</td>';
+    h+='<td style="text-align:center;color:#5B86E5">'+tP.toLocaleString()+'</td><td style="text-align:center;color:#8B5CF6">'+tB.toLocaleString()+'</td>';
+    h+='<td style="text-align:center;color:#FF6347">'+tS.toLocaleString()+'</td><td style="text-align:center;color:#E67E22">'+tSB.toLocaleString()+'</td>';
+    h+='<td style="text-align:center;color:#2D5F2D;background:#F0FAF0">'+tSE.toLocaleString()+'</td><td style="text-align:center;color:#2D5F2D;background:#F0FAF0">'+tSBE.toLocaleString()+'</td>';
+    h+='<td style="text-align:center;font-size:13px;color:#2D5F2D"><b>'+gt.toLocaleString()+'</b></td></tr></tbody></table>';
     document.getElementById('ps-strategy').innerHTML=h;
 }
-function onPE(el){const ci=+el.dataset.ci;const tp=el.dataset.type||'pat';let v=parseInt(el.value.replace(/[^0-9]/g,''));if(isNaN(v))v=0;const t=sum(CH[ci].monthly);const p=tp==='pat'?v:CH[ci].pat_qty;const b=tp==='big'?v:(CH[ci].big_qty||0);const sb=tp==='sbig'?v:(CH[ci].sbig_qty||0);if(p+b+sb>t)v=Math.max(0,t-(tp==='pat'?b+sb:tp==='big'?p+sb:p+b));if(tp==='pat'){CH[ci].pat_qty=v;const patAll=v+(CH[ci].big_qty||0);CH[ci].big_qty=Math.round(patAll*BIG_R);CH[ci].pat_qty=patAll-CH[ci].big_qty;const solAll=t-patAll-(CH[ci].sbig_qty||0);CH[ci].sbig_qty=solAll>0?Math.round((solAll+(CH[ci].sbig_qty||0))*SBIG_R):0}else if(tp==='big'){CH[ci].big_qty=v;el.classList.toggle('changed',v!==(ORIG_B[ci]||0))}else{CH[ci].sbig_qty=v;el.classList.toggle('changed',v!==(ORIG_SB[ci]||0))}el.value=v.toLocaleString();renderPlanAll()}
+function onPatPct(el){const ci=+el.dataset.ci;let pct=parseInt(el.value.replace(/[^0-9]/g,''));if(isNaN(pct))pct=0;if(pct>100)pct=100;const t=sum(CH[ci].monthly);const patAll=Math.round(t*pct/100);CH[ci].big_qty=Math.round(patAll*BIG_R);CH[ci].pat_qty=patAll-CH[ci].big_qty;const solAll=t-patAll;CH[ci].sbig_qty=solAll>0?Math.round(solAll*SBIG_R):0;el.value=pct;renderPlanAll()}
+function onSolExtra(el){const ci=+el.dataset.ci;const tp=el.dataset.type;let v=parseInt(el.value.replace(/[^0-9]/g,''));if(isNaN(v))v=0;if(tp==='sol')CH[ci].sol_extra=v;else CH[ci].sbig_extra=v;el.value=v||'';renderPlanAll()}
 function renderWeekly(){
     const gt=sum(CH.map(c=>sum(c.monthly)));let hdr='<th>주차</th><th>기간</th>';CH.forEach(c=>{hdr+='<th>'+c.short+'</th>'});hdr+='<th>합계</th><th>누적</th><th style="width:110px">소진율</th>';document.getElementById('wh').innerHTML=hdr;
     const mcss=['wsep','woct','wnov','wdec','wjan'];
