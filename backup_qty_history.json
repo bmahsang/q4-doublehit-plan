@@ -1,0 +1,38 @@
+{
+  "_note": "채널별 패턴/솔리드 수량 변경 이력 백업",
+
+  "v1_초기계획": {
+    "description": "최초 수동 설정값 (대형견 미분리)",
+    "channels": {
+      "스스":     {"pat_qty": 15000, "big_qty": 0, "sbig_qty": 0, "pat_note": "패턴 15,000 + 솔리드 3,000"},
+      "쿠팡":     {"pat_qty": 0,     "big_qty": 0, "sbig_qty": 0, "pat_note": "솔리드 10,000 전량"},
+      "자사몰":   {"pat_qty": 3000,  "big_qty": 0, "sbig_qty": 0, "pat_note": "패턴 3,000 + 솔리드 2,000"},
+      "무신사":   {"pat_qty": 5000,  "big_qty": 0, "sbig_qty": 0, "pat_note": "패턴 5,000 전량"},
+      "오프라인": {"pat_qty": 4000,  "big_qty": 0, "sbig_qty": 0, "pat_note": "패턴 4,000 + 솔리드 800"},
+      "해외":     {"pat_qty": 0,     "big_qty": 0, "sbig_qty": 0, "pat_note": "솔리드 3,500 전량"},
+      "페어":     {"pat_qty": 2000,  "big_qty": 0, "sbig_qty": 0, "pat_note": "패턴 2,000 전량"},
+      "B2B":      {"pat_qty": 1000,  "big_qty": 0, "sbig_qty": 0, "pat_note": "패턴 1,000 + 솔리드 700"}
+    },
+    "totals": {"pat": 30000, "sol": 20000}
+  },
+
+  "v2_작년비율_그대로": {
+    "description": "작년 실적 비율 그대로 적용 (2026-06-11)",
+    "ratios": {
+      "스스": "79.7%", "쿠팡": "0% (전략)", "자사몰": "66.9%",
+      "무신사": "83.0%", "오프라인": "66.7%", "해외": "0% (전략)",
+      "페어": "94.9%", "B2B": "69.2%"
+    },
+    "channels": {
+      "스스":     {"pat_qty": 13806, "big_qty": 540, "sbig_qty": 143},
+      "쿠팡":     {"pat_qty": 0,     "big_qty": 0,   "sbig_qty": 5},
+      "자사몰":   {"pat_qty": 3541,  "big_qty": 139, "sbig_qty": 71},
+      "무신사":   {"pat_qty": 3994,  "big_qty": 156, "sbig_qty": 33},
+      "오프라인": {"pat_qty": 3556,  "big_qty": 139, "sbig_qty": 72},
+      "해외":     {"pat_qty": 0,     "big_qty": 0,   "sbig_qty": 137},
+      "페어":     {"pat_qty": 1826,  "big_qty": 72,  "sbig_qty": 4},
+      "B2B":      {"pat_qty": 1998,  "big_qty": 78,  "sbig_qty": 36}
+    },
+    "totals": {"pat": 29845, "sol": 22195}
+  }
+}
