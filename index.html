@@ -460,9 +460,9 @@ const P=(function(){
     function renderInputs(){
         let h='<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:16px 20px;background:linear-gradient(135deg,#EBF3FE,#F0F7FF);border-radius:12px;border:1px solid #B8D4FE">';
         h+='<div style="font-weight:800;color:#5B86E5;font-size:15px;white-space:nowrap">$ USD 원가</div>';
-        h+='<div><label style="font-size:11px;color:#888;display:block;margin-bottom:2px">패턴 (USD)</label><input class="pinp" style="width:90px;font-size:15px" value="'+(D.usd_pat||'')+'" placeholder="0.00" onfocus="this.select()" onchange="P.onUSD(\'pat\',this)" onblur="P.onUSD(\'pat\',this)"></div>';
-        h+='<div><label style="font-size:11px;color:#888;display:block;margin-bottom:2px">솔리드 (USD)</label><input class="pinp" style="width:90px;font-size:15px" value="'+(D.usd_sol||'')+'" placeholder="0.00" onfocus="this.select()" onchange="P.onUSD(\'sol\',this)" onblur="P.onUSD(\'sol\',this)"></div>';
-        h+='<div style="font-size:12px;color:#5B86E5;line-height:1.6"><b>$1 = \\u20A91,550</b> (고정)<br><span style="font-size:11px;color:#888">패턴: USD x 1,550 + (판매가 x 0.055 + 3.3)<br>솔리드: USD x 1,550</span></div>';
+        h+='<div><label style="font-size:11px;color:#888;display:block;margin-bottom:2px">패턴 (USD)</label><input class="pinp" style="width:90px;font-size:15px" value="'+(D.usd_pat||'')+'" placeholder="0.00" onfocus="this.select()" oninput="P.previewUSD(\'pat\',this)" onblur="P.onUSD(\'pat\',this)"><div id="usd-pv-pat" style="font-size:11px;color:#2D5F2D;font-weight:700;margin-top:2px">'+(D.usd_pat>0?'→ ₩'+Math.round(D.usd_pat*1550+(D.new_pat_price*0.066+3.3)).toLocaleString():'')+'</div></div>';
+        h+='<div><label style="font-size:11px;color:#888;display:block;margin-bottom:2px">솔리드 (USD)</label><input class="pinp" style="width:90px;font-size:15px" value="'+(D.usd_sol||'')+'" placeholder="0.00" onfocus="this.select()" oninput="P.previewUSD(\'sol\',this)" onblur="P.onUSD(\'sol\',this)"><div id="usd-pv-sol" style="font-size:11px;color:#2D5F2D;font-weight:700;margin-top:2px">'+(D.usd_sol>0?'→ ₩'+Math.round(D.usd_sol*1550).toLocaleString():'')+'</div></div>';
+        h+='<div style="font-size:12px;color:#5B86E5;line-height:1.6"><b>$1 = ₩1,550</b> (고정)<br><span style="font-size:11px;color:#888">패턴: USD x 1,550 + (판매가 x 0.066 + 3.3)<br>솔리드: USD x 1,550</span></div>';
         h+='</div>';
         h+='<table class="etbl"><thead>';
         h+='<tr><th rowspan="2" style="width:72px"></th>';
@@ -672,14 +672,15 @@ const P=(function(){
     function load(){try{const s=localStorage.getItem('dh_pricing5');if(s){const p=JSON.parse(s);Object.assign(D,p);if(p.mkt_old)D.mkt_old=p.mkt_old;if(p.mkt_new)D.mkt_new=p.mkt_new}}catch(e){}}
 
     return{
-        onD(k,el){D[k]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;if(k==='new_pat_price'&&D.usd_pat>0){D.new_pat_cogs=Math.round(D.usd_pat*1550+(D.new_pat_price*0.055+3.3))}this.renderAll()},
-        onUSD(t,el){const v=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;if(t==='pat'){D.usd_pat=v;D.new_pat_cogs=Math.round(v*1550+(D.new_pat_price*0.055+3.3))}else{D.usd_sol=v;D.new_sol_cogs=Math.round(v*1550)}this.renderAll()},
+        onD(k,el){D[k]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;if(k==='new_pat_price'&&D.usd_pat>0){D.new_pat_cogs=Math.round(D.usd_pat*1550+(D.new_pat_price*0.066+3.3))}this.renderAll()},
+        previewUSD(t,el){const v=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;const pv=document.getElementById('usd-pv-'+t);if(t==='pat'){const c=Math.round(v*1550+(D.new_pat_price*0.066+3.3));pv.textContent=v>0?'→ ₩'+c.toLocaleString():''}else{const c=Math.round(v*1550);pv.textContent=v>0?'→ ₩'+c.toLocaleString():''}},
+        onUSD(t,el){const v=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;if(t==='pat'){D.usd_pat=v;D.new_pat_cogs=Math.round(v*1550+(D.new_pat_price*0.066+3.3))}else{D.usd_sol=v;D.new_sol_cogs=Math.round(v*1550)}this.renderAll()},
         onMktOld(ci,el){D.mkt_old[ci]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
         onMktNew(ci,el){D.mkt_new[ci]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
         getState(){return JSON.parse(JSON.stringify(D))},
         setState(s){Object.assign(D,s);if(s.mkt_old)D.mkt_old=s.mkt_old;if(s.mkt_new)D.mkt_new=s.mkt_new},
         renderAll(){renderInputs();renderVarCost();renderCompare();renderScenario();save()},
-        init(){load();if(D.usd_pat>0){D.new_pat_cogs=Math.round(D.usd_pat*1550+(D.new_pat_price*0.055+3.3))}if(D.usd_sol>0){D.new_sol_cogs=Math.round(D.usd_sol*1550)}},
+        init(){load();if(D.usd_pat>0){D.new_pat_cogs=Math.round(D.usd_pat*1550+(D.new_pat_price*0.066+3.3))}if(D.usd_sol>0){D.new_sol_cogs=Math.round(D.usd_sol*1550)}},
         exportData(){toast('localStorage에 자동 저장됨')},
         handleImport(){}
     };
