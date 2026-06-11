@@ -442,6 +442,7 @@ const P=(function(){
         {k:'sol',l:'솔리드',c:'#FF6347',roy:false},
         {k:'sbig',l:'솔리드 대형견',c:'#E67E22',roy:false}
     ];
+    const LAST={pat:18802,big:1441,sol:9630,sbig:645,total:30518};
 
     function disc(retail,price){return retail>0?((1-price/retail)*100):0}
 
@@ -500,6 +501,14 @@ const P=(function(){
             h+='<div><label style="font-size:11px;color:'+t.c+';font-weight:600;display:block;margin-bottom:2px">'+t.l+'</label>';
             h+='<input class="pinp" style="width:100%;font-size:14px" value="'+(u||'')+'" placeholder="0.00" onfocus="this.select()" oninput="P.previewUSD(\''+t.k+'\',this)" onblur="P.onUSD(\''+t.k+'\',this)">';
             h+='<div id="usd-pv-'+t.k+'" style="font-size:11px;color:#2D5F2D;font-weight:700;margin-top:2px">'+(u>0?'→ ₩'+cv.toLocaleString():'')+'</div></div>';
+        });
+        h+='</div>';
+
+        h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;padding:14px;background:#f9f9f4;border-radius:10px;border:1px solid #e0ddd0">';
+        h+='<div style="grid-column:1/-1;font-weight:700;font-size:13px;color:#555">작년 실적 (25FW 출고 기준)</div>';
+        PTYPES.forEach(t=>{
+            const v=LAST[t.k];const pct=(v/LAST.total*100).toFixed(1);
+            h+='<div style="text-align:center"><div style="font-size:11px;color:'+t.c+';font-weight:600">'+t.l+'</div><div style="font-size:20px;font-weight:800;color:'+t.c+'">'+v.toLocaleString()+'</div><div style="font-size:10px;color:#888">'+pct+'%</div></div>';
         });
         h+='</div>';
 
@@ -619,7 +628,7 @@ const P=(function(){
         rows.forEach(d=>{
             const cls=d.diff>=0?'cm-pos':'cm-neg';
             h+='<tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+d.c.color+';margin-right:6px"></span>'+d.c.short+'</td>';
-            h+='<td>'+fN(d.q.total)+'<span style="font-size:10px;color:#888"> (P'+fN(d.q.pat)+(d.q.big?'/PX'+fN(d.q.big):'')+(d.q.sbig?'/SX'+fN(d.q.sbig):'')+'/S'+fN(d.q.sol)+')</span></td>';
+            h+='<td>'+fN(d.q.total)+'<span style="font-size:10px;color:#888"> (패'+fN(d.q.pat)+(d.q.big?'/패대'+fN(d.q.big):'')+(d.q.sbig?'/솔대'+fN(d.q.sbig):'')+'/솔'+fN(d.q.sol)+')</span></td>';
             h+='<td style="font-size:11px;color:#E67E22">'+fP(d.nm)+'</td>';
             h+='<td style="font-size:11px;color:#3498DB">'+fP(d.oth)+'</td>';
             h+='<td style="color:#888">'+fN(d.c.cm_unit)+'</td>';
