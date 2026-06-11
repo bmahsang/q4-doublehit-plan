@@ -153,7 +153,7 @@ h1{font-size:26px;font-weight:800;margin-bottom:6px}
 <div class="bigs">
     <div class="big"><div class="lb">총 발주량</div><div class="vl" style="color:#FF6B35" id="s-qty">-</div><div class="dt">장 (전량 소진 필수)</div></div>
     <div class="big"><div class="lb">예상 공헌이익</div><div class="vl" style="color:#2D5F2D" id="s-cm">-</div><div class="dt">채널별 마진 반영</div></div>
-    <div class="big"><div class="lb">패턴 : 솔리드</div><div class="vl" style="font-size:22px" id="s-ps">-</div><div class="dt" id="s-ps2">-</div></div>
+    <div class="big"><div class="lb">제품 배분</div><div class="vl" style="font-size:22px" id="s-ps">-</div><div class="dt" id="s-ps2">-</div></div>
     <div class="big"><div class="lb">가장 중요한 달</div><div class="vl" style="color:#E31837">11월</div><div class="dt" id="s-nov">-</div></div>
 </div>
 
@@ -307,29 +307,30 @@ function sum(a){return a.reduce((x,y)=>x+y,0)}
 /* ========================================================
    PLAN TAB (기존 코드 그대로)
    ======================================================== */
-const CH=[{"name":"스마트스토어","short":"스스","plan":18000,"last":13630,"monthly":[1440,2520,8460,4680,900],"cm_unit":5221,"color":"#FF6B35","pat_qty":15000,"big_qty":0,"pat_note":"패턴 15,000 + 솔리드 3,000. 산리오 메인 채널","weights":{"0":[0,0,0,1.0],"1":[0.05,0.1,0.15,0.35,0.35],"2":[0.18,0.18,0.45,0.19],"3":[0.22,0.15,0.2,0.33,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"쿠팡","short":"쿠팡","plan":10000,"last":7411,"monthly":[600,1300,3200,4100,800],"cm_unit":8280,"color":"#E31837","pat_qty":0,"big_qty":0,"pat_note":"솔리드 10,000 전량. 9월 솔리드 선출시","weights":{"0":[0,0,0,1.0],"1":[0.03,0.1,0.12,0.39,0.36],"2":[0.21,0.21,0.42,0.16],"3":[0.21,0.16,0.21,0.32,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"자사몰","short":"자사몰","plan":5000,"last":1970,"monthly":[0,1550,1850,1350,250],"cm_unit":12774,"color":"#2D5F2D","pat_qty":3000,"big_qty":0,"pat_note":"패턴 3,000 + 솔리드 2,000. 자체 프로모 연동","weights":{"0":[0,0,0,0],"1":[0.1,0.15,0.2,0.3,0.25],"2":[0.22,0.23,0.32,0.23],"3":[0.22,0.18,0.22,0.28,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"무신사/29cm","short":"무신사","plan":5000,"last":409,"monthly":[0,1650,1950,1200,200],"cm_unit":5000,"color":"#1a1a1a","pat_qty":5000,"big_qty":0,"pat_note":"패턴 5,000 전량. MZ 타겟 IP 집중","weights":{"0":[0,0,0,0],"1":[0.1,0.2,0.25,0.25,0.2],"2":[0.25,0.25,0.3,0.2],"3":[0.25,0.2,0.25,0.2,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"오프라인/사입","short":"오프라인","plan":4800,"last":1749,"monthly":[0,960,2160,1440,240],"cm_unit":5000,"color":"#888888","pat_qty":4000,"big_qty":0,"pat_note":"패턴 4,000 + 솔리드 800. 매장별 사입 기반","weights":{"0":[0,0,0,0],"1":[0.05,0.15,0.3,0.3,0.2],"2":[0.15,0.2,0.4,0.25],"3":[0.2,0.15,0.25,0.3,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"해외 (JP+글로벌)","short":"해외","plan":3500,"last":2589,"monthly":[0,2800,525,175,0],"cm_unit":3538,"color":"#1E90FF","pat_qty":0,"big_qty":0,"pat_note":"솔리드 3,500 전량. IP 라이선스 해외 판매 제한","weights":{"0":[0,0,0,0],"1":[0.15,0.25,0.3,0.2,0.1],"2":[0.3,0.3,0.25,0.15],"3":[0.3,0.25,0.25,0.15,0.05],"4":[0,0,0,0]}},{"name":"페어","short":"페어","plan":2000,"last":990,"monthly":[0,0,1200,700,100],"cm_unit":4000,"color":"#9370DB","pat_qty":2000,"big_qty":0,"pat_note":"패턴 2,000 전량. 전시회 바이어향","weights":{"0":[0,0,0,0],"1":[0,0,0,0,0],"2":[0.1,0.4,0.4,0.1],"3":[0.25,0.25,0.25,0.2,0.05],"4":[0.25,0.25,0.25,0.25]}},{"name":"B2B","short":"B2B","plan":1700,"last":919,"monthly":[0,290,700,540,170],"cm_unit":3500,"color":"#8B7355","pat_qty":1000,"big_qty":0,"pat_note":"패턴 1,000 + 솔리드 700. 거래처별 상이","weights":{"0":[0,0,0,0],"1":[0,0.1,0.3,0.3,0.3],"2":[0.15,0.2,0.35,0.3],"3":[0.2,0.15,0.2,0.3,0.15],"4":[0.25,0.25,0.25,0.25]}},{"name":"시딩","short":"시딩","plan":0,"last":0,"monthly":[0,0,0,0,0],"cm_unit":0,"color":"#9370DB","pat_qty":0,"big_qty":0,"pat_note":"인플루언서·홍보·샘플 등","weights":{"0":[0.25,0.25,0.25,0.25],"1":[0.2,0.2,0.2,0.2,0.2],"2":[0.25,0.25,0.25,0.25],"3":[0.2,0.2,0.2,0.2,0.2],"4":[0.25,0.25,0.25,0.25]}}];
+const CH=[{"name":"스마트스토어","short":"스스","plan":18000,"last":13630,"monthly":[1440,2520,8460,4680,900],"cm_unit":5221,"color":"#FF6B35","pat_qty":15000,"big_qty":0,"sbig_qty":0,"pat_note":"패턴 15,000 + 솔리드 3,000. 산리오 메인 채널","weights":{"0":[0,0,0,1.0],"1":[0.05,0.1,0.15,0.35,0.35],"2":[0.18,0.18,0.45,0.19],"3":[0.22,0.15,0.2,0.33,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"쿠팡","short":"쿠팡","plan":10000,"last":7411,"monthly":[600,1300,3200,4100,800],"cm_unit":8280,"color":"#E31837","pat_qty":0,"big_qty":0,"sbig_qty":0,"pat_note":"솔리드 10,000 전량. 9월 솔리드 선출시","weights":{"0":[0,0,0,1.0],"1":[0.03,0.1,0.12,0.39,0.36],"2":[0.21,0.21,0.42,0.16],"3":[0.21,0.16,0.21,0.32,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"자사몰","short":"자사몰","plan":5000,"last":1970,"monthly":[0,1550,1850,1350,250],"cm_unit":12774,"color":"#2D5F2D","pat_qty":3000,"big_qty":0,"sbig_qty":0,"pat_note":"패턴 3,000 + 솔리드 2,000. 자체 프로모 연동","weights":{"0":[0,0,0,0],"1":[0.1,0.15,0.2,0.3,0.25],"2":[0.22,0.23,0.32,0.23],"3":[0.22,0.18,0.22,0.28,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"무신사/29cm","short":"무신사","plan":5000,"last":409,"monthly":[0,1650,1950,1200,200],"cm_unit":5000,"color":"#1a1a1a","pat_qty":5000,"big_qty":0,"sbig_qty":0,"pat_note":"패턴 5,000 전량. MZ 타겟 IP 집중","weights":{"0":[0,0,0,0],"1":[0.1,0.2,0.25,0.25,0.2],"2":[0.25,0.25,0.3,0.2],"3":[0.25,0.2,0.25,0.2,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"오프라인/사입","short":"오프라인","plan":4800,"last":1749,"monthly":[0,960,2160,1440,240],"cm_unit":5000,"color":"#888888","pat_qty":4000,"big_qty":0,"sbig_qty":0,"pat_note":"패턴 4,000 + 솔리드 800. 매장별 사입 기반","weights":{"0":[0,0,0,0],"1":[0.05,0.15,0.3,0.3,0.2],"2":[0.15,0.2,0.4,0.25],"3":[0.2,0.15,0.25,0.3,0.1],"4":[0.25,0.25,0.25,0.25]}},{"name":"해외 (JP+글로벌)","short":"해외","plan":3500,"last":2589,"monthly":[0,2800,525,175,0],"cm_unit":3538,"color":"#1E90FF","pat_qty":0,"big_qty":0,"sbig_qty":0,"pat_note":"솔리드 3,500 전량. IP 라이선스 해외 판매 제한","weights":{"0":[0,0,0,0],"1":[0.15,0.25,0.3,0.2,0.1],"2":[0.3,0.3,0.25,0.15],"3":[0.3,0.25,0.25,0.15,0.05],"4":[0,0,0,0]}},{"name":"페어","short":"페어","plan":2000,"last":990,"monthly":[0,0,1200,700,100],"cm_unit":4000,"color":"#9370DB","pat_qty":2000,"big_qty":0,"sbig_qty":0,"pat_note":"패턴 2,000 전량. 전시회 바이어향","weights":{"0":[0,0,0,0],"1":[0,0,0,0,0],"2":[0.1,0.4,0.4,0.1],"3":[0.25,0.25,0.25,0.2,0.05],"4":[0.25,0.25,0.25,0.25]}},{"name":"B2B","short":"B2B","plan":1700,"last":919,"monthly":[0,290,700,540,170],"cm_unit":3500,"color":"#8B7355","pat_qty":1000,"big_qty":0,"sbig_qty":0,"pat_note":"패턴 1,000 + 솔리드 700. 거래처별 상이","weights":{"0":[0,0,0,0],"1":[0,0.1,0.3,0.3,0.3],"2":[0.15,0.2,0.35,0.3],"3":[0.2,0.15,0.2,0.3,0.15],"4":[0.25,0.25,0.25,0.25]}},{"name":"시딩","short":"시딩","plan":0,"last":0,"monthly":[0,0,0,0,0],"cm_unit":0,"color":"#9370DB","pat_qty":0,"big_qty":0,"sbig_qty":0,"pat_note":"인플루언서·홍보·샘플 등","weights":{"0":[0.25,0.25,0.25,0.25],"1":[0.2,0.2,0.2,0.2,0.2],"2":[0.25,0.25,0.25,0.25],"3":[0.2,0.2,0.2,0.2,0.2],"4":[0.25,0.25,0.25,0.25]}}];
 const WK=[["9월 1주","9/1-9/7",0],["9월 2주","9/8-9/14",0],["9월 3주","9/15-9/21",0],["9월 4주","9/22-9/28",0],["10월 1주","9/29-10/5",1],["10월 2주","10/6-10/12",1],["10월 3주","10/13-10/19",1],["10월 4주","10/20-10/26",1],["10월 5주","10/27-11/1",1],["11월 1주","11/2-11/8",2],["11월 2주","11/9-11/15",2],["11월 3주","11/16-11/22",2],["11월 4주","11/23-11/29",2],["12월 1주","11/30-12/6",3],["12월 2주","12/7-12/13",3],["12월 3주","12/14-12/20",3],["12월 4주","12/21-12/27",3],["12월 5주","12/28-1/3",3],["1월 1주","1/4-1/10",4],["1월 2주","1/11-1/17",4],["1월 3주","1/18-1/24",4],["1월 4주","1/25-1/31",4]];
 const MN=['9월','10월','11월','12월','1월'];
 const MCOL=['#FF9F43','#2ED573','#FFC312','#70A1FF','#A29BFE'];
 const ORIG=CH.map(c=>[...c.monthly]);
 const ORIG_P=CH.map(c=>c.pat_qty);
 const ORIG_B=CH.map(c=>c.big_qty||0);
+const ORIG_SB=CH.map(c=>c.sbig_qty||0);
 const PAT_MAX=30000,SOL_MAX=20000;
 const REPO='bmahsang/q4-doublehit-plan';
 let _ghSha=null;
 
 function getToken(){return localStorage.getItem('gh_tok')}
 function setToken(t){localStorage.setItem('gh_tok',t)}
-function resetAll(){if(!confirm('초기값으로 되돌릴까요?'))return;CH.forEach((c,i)=>{c.monthly=[...ORIG[i]];c.pat_qty=ORIG_P[i];c.big_qty=ORIG_B[i]||0});renderPlanAll()}
+function resetAll(){if(!confirm('초기값으로 되돌릴까요?'))return;CH.forEach((c,i)=>{c.monthly=[...ORIG[i]];c.pat_qty=ORIG_P[i];c.big_qty=ORIG_B[i]||0;c.sbig_qty=ORIG_SB[i]||0});renderPlanAll()}
 
 async function loadFromGH(){
-    try{const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master&t='+Date.now());if(!r.ok)return false;const d=await r.json();_ghSha=d.sha;const s=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));s.monthly.forEach((row,i)=>{if(CH[i])CH[i].monthly=row});s.pat_qty.forEach((v,i)=>{if(CH[i])CH[i].pat_qty=v});if(s.big_qty)s.big_qty.forEach((v,i)=>{if(CH[i])CH[i].big_qty=v});if(s.pricing)P.setState(s.pricing);const b=document.getElementById('share-banner');if(s.saved_by&&s.saved_by!=='initial'){b.innerHTML='<span class="sb-who">'+s.saved_by+'</span> 님이 마지막 저장<span class="sb-time">'+s.saved_at+'</span>';b.style.display='block'}return true}catch(e){return false}
+    try{const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master&t='+Date.now());if(!r.ok)return false;const d=await r.json();_ghSha=d.sha;const s=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));s.monthly.forEach((row,i)=>{if(CH[i])CH[i].monthly=row});s.pat_qty.forEach((v,i)=>{if(CH[i])CH[i].pat_qty=v});if(s.big_qty)s.big_qty.forEach((v,i)=>{if(CH[i])CH[i].big_qty=v});if(s.sbig_qty)s.sbig_qty.forEach((v,i)=>{if(CH[i])CH[i].sbig_qty=v});if(s.pricing)P.setState(s.pricing);const b=document.getElementById('share-banner');if(s.saved_by&&s.saved_by!=='initial'){b.innerHTML='<span class="sb-who">'+s.saved_by+'</span> 님이 마지막 저장<span class="sb-time">'+s.saved_at+'</span>';b.style.display='block'}return true}catch(e){return false}
 }
 async function saveToGH(){
     let token=getToken();if(!token){token=prompt('팀 토큰을 입력하세요 (최초 1회만 입력)');if(!token)return;setToken(token)}
     const name=prompt('저장자 이름을 입력하세요 (예: 홍길동)');if(!name)return;
     const now=new Date();const ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    const state={monthly:CH.map(c=>c.monthly),pat_qty:CH.map(c=>c.pat_qty),big_qty:CH.map(c=>c.big_qty||0),pricing:P.getState(),saved_by:name,saved_at:ts};
+    const state={monthly:CH.map(c=>c.monthly),pat_qty:CH.map(c=>c.pat_qty),big_qty:CH.map(c=>c.big_qty||0),sbig_qty:CH.map(c=>c.sbig_qty||0),pricing:P.getState(),saved_by:name,saved_at:ts};
     const body=btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2))));
     try{if(!_ghSha){const gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json?ref=master',{headers:{'Authorization':'token '+token}});if(gr.ok){const gd=await gr.json();_ghSha=gd.sha}}
     const pr=await fetch('https://api.github.com/repos/'+REPO+'/contents/state.json',{method:'PUT',headers:{'Authorization':'token '+token,'Content-Type':'application/json'},body:JSON.stringify({message:name+' saved ('+ts+')',content:body,sha:_ghSha,branch:'master'})});
@@ -357,31 +358,40 @@ function renderCards(){
     const own=ranked.find(c=>c.short==='자사몰');if(own&&gt>0)ins+='<br><b>핵심:</b> 자사몰은 물량 '+(own.t/gt*100).toFixed(0)+'%인데 이익은 <b>'+(own.cm/gcm*100).toFixed(0)+'%</b>. 여기 밀리면 타격 큽니다.';
     document.getElementById('cm-insight').innerHTML=ins;
     document.getElementById('s-qty').textContent=gt.toLocaleString();document.getElementById('s-cm').textContent=fCM(gcm);
-    const tP=sum(CH.map(c=>c.pat_qty));const tB=sum(CH.map(c=>c.big_qty||0));const tS=gt-tP-tB;
-    document.getElementById('s-ps').textContent=tP.toLocaleString()+' : '+tB.toLocaleString()+' : '+tS.toLocaleString();
-    document.getElementById('s-ps2').textContent='패턴 '+(gt>0?(tP/gt*100).toFixed(0):'0')+'% / 대형 '+(gt>0?(tB/gt*100).toFixed(0):'0')+'% / 솔리드 '+(gt>0?(tS/gt*100).toFixed(0):'0')+'%';
+    const tP=sum(CH.map(c=>c.pat_qty));const tB=sum(CH.map(c=>c.big_qty||0));const tSB=sum(CH.map(c=>c.sbig_qty||0));const tS=gt-tP-tB-tSB;
+    document.getElementById('s-ps').textContent='P '+tP.toLocaleString()+' / PX '+tB.toLocaleString()+' / S '+tS.toLocaleString()+' / SX '+tSB.toLocaleString();
+    document.getElementById('s-ps2').textContent='패턴 '+(gt>0?((tP+tB)/gt*100).toFixed(0):'0')+'% / 솔리드 '+(gt>0?((tS+tSB)/gt*100).toFixed(0):'0')+'%';
     document.getElementById('s-nov').textContent='전체의 '+(gt>0?(sum(CH.map(c=>c.monthly[2]))/gt*100).toFixed(0):'0')+'%';
 }
 function renderPS(){
-    const gt=sum(CH.map(c=>sum(c.monthly)));const tP=sum(CH.map(c=>c.pat_qty));const tB=sum(CH.map(c=>c.big_qty||0));const tS=gt-tP-tB;const patLeft=PAT_MAX-tP,solLeft=SOL_MAX-tS;
-    let h='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">';
-    h+='<div style="padding:14px;background:'+(patLeft<0?'#FDE8E8':'#EBF3FE')+';border-radius:10px;border:2px solid '+(patLeft<0?'#E31837':'transparent')+'"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;color:#5B86E5;font-size:14px">패턴 (산리오)</span><span style="font-size:11px;color:#888">MAX '+PAT_MAX.toLocaleString()+'</span></div><div style="font-size:26px;font-weight:800;color:'+(patLeft<0?'#E31837':'#5B86E5')+'">'+tP.toLocaleString()+'<span style="font-size:13px;font-weight:600">장</span></div><div style="height:8px;background:#ddd;border-radius:4px;margin:6px 0;overflow:hidden"><div style="height:100%;width:'+Math.min(tP/PAT_MAX*100,100)+'%;background:'+(patLeft<0?'#E31837':'linear-gradient(90deg,#5B86E5,#36D1DC)')+';border-radius:4px"></div></div><div style="font-size:12px;font-weight:700;color:'+(patLeft<0?'#E31837':'#2D5F2D')+'">잔여 '+patLeft.toLocaleString()+'장'+(patLeft<0?' !! 초과':'')+'</div></div>';
-    h+='<div style="padding:14px;background:#F5F0FF;border-radius:10px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;color:#8B5CF6;font-size:14px">대형견</span></div><div style="font-size:26px;font-weight:800;color:#8B5CF6">'+tB.toLocaleString()+'<span style="font-size:13px;font-weight:600">장</span></div><div style="height:8px;background:#ddd;border-radius:4px;margin:6px 0;overflow:hidden"><div style="height:100%;width:'+(gt>0?Math.min(tB/gt*100,100):0)+'%;background:linear-gradient(90deg,#8B5CF6,#A78BFA);border-radius:4px"></div></div><div style="font-size:12px;font-weight:700;color:#666">전체의 '+(gt>0?Math.round(tB/gt*100):0)+'%</div></div>';
-    h+='<div style="padding:14px;background:'+(solLeft<0?'#FDE8E8':'#FFF0EC')+';border-radius:10px;border:2px solid '+(solLeft<0?'#E31837':'transparent')+'"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;color:#FF6347;font-size:14px">솔리드</span><span style="font-size:11px;color:#888">MAX '+SOL_MAX.toLocaleString()+'</span></div><div style="font-size:26px;font-weight:800;color:'+(solLeft<0?'#E31837':'#FF6347')+'">'+tS.toLocaleString()+'<span style="font-size:13px;font-weight:600">장</span></div><div style="height:8px;background:#ddd;border-radius:4px;margin:6px 0;overflow:hidden"><div style="height:100%;width:'+Math.min(tS/SOL_MAX*100,100)+'%;background:'+(solLeft<0?'#E31837':'linear-gradient(90deg,#FFA07A,#FF6347)')+';border-radius:4px"></div></div><div style="font-size:12px;font-weight:700;color:'+(solLeft<0?'#E31837':'#2D5F2D')+'">잔여 '+solLeft.toLocaleString()+'장'+(solLeft<0?' !! 초과':'')+'</div></div></div>';
-    h+='<table class="etbl"><thead><tr><th>채널</th><th>총 수량</th><th style="color:#5B86E5">패턴</th><th style="color:#8B5CF6">대형견</th><th style="color:#FF6347">솔리드</th><th style="width:140px">비율</th><th style="text-align:left">운영 메모</th></tr></thead><tbody>';
-    CH.forEach((c,ci)=>{const t=sum(c.monthly);const p=c.pat_qty;const b=c.big_qty||0;const s=t-p-b;const ppP=t>0?Math.round(p/t*100):0;const ppB=t>0?Math.round(b/t*100):0;
-    h+='<tr style="border-bottom:1px solid #eee"><td style="padding:8px;font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:6px"></span>'+c.short+'</td><td style="text-align:center;font-weight:600">'+t.toLocaleString()+'</td>';
-    h+='<td style="text-align:center"><input type="text" class="ei'+(p!==ORIG_P[ci]?' changed':'')+'" style="width:60px" value="'+p.toLocaleString()+'" data-ci="'+ci+'" data-type="pat" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
-    h+='<td style="text-align:center"><input type="text" class="ei'+(b!==(ORIG_B[ci]||0)?' changed':'')+'" style="width:60px" value="'+b.toLocaleString()+'" data-ci="'+ci+'" data-type="big" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
-    h+='<td style="text-align:center;color:#FF6347;font-weight:700;font-size:13px">'+s.toLocaleString()+'</td><td><div style="display:flex;height:14px;border-radius:7px;overflow:hidden">';
-    if(ppP>0)h+='<div style="width:'+ppP+'%;background:linear-gradient(90deg,#5B86E5,#36D1DC)"></div>';if(ppB>0)h+='<div style="width:'+ppB+'%;background:linear-gradient(90deg,#8B5CF6,#A78BFA)"></div>';const ppS=100-ppP-ppB;if(ppS>0)h+='<div style="width:'+ppS+'%;background:linear-gradient(90deg,#FFA07A,#FF6347)"></div>';
-    h+='</div></td><td style="font-size:11px;color:#666;padding-left:10px">'+c.pat_note+'</td></tr>'});
-    h+='<tr style="border-top:2px solid #333;font-weight:700;background:#f9f9f4"><td style="padding:8px">합계</td><td style="text-align:center">'+gt.toLocaleString()+'</td><td style="text-align:center;color:#5B86E5;font-size:14px">'+tP.toLocaleString()+'</td><td style="text-align:center;color:#8B5CF6;font-size:14px">'+tB.toLocaleString()+'</td><td style="text-align:center;color:#FF6347;font-size:14px">'+tS.toLocaleString()+'</td>';
-    const ppP2=gt>0?Math.round(tP/gt*100):33;const ppB2=gt>0?Math.round(tB/gt*100):0;const ppS2=100-ppP2-ppB2;
-    h+='<td><div style="display:flex;height:14px;border-radius:7px;overflow:hidden"><div style="width:'+ppP2+'%;background:linear-gradient(90deg,#5B86E5,#36D1DC)"></div><div style="width:'+ppB2+'%;background:linear-gradient(90deg,#8B5CF6,#A78BFA)"></div><div style="width:'+ppS2+'%;background:linear-gradient(90deg,#FFA07A,#FF6347)"></div></div></td><td style="font-size:11px;color:#666;padding-left:10px">패턴 '+ppP2+'% / 대형 '+ppB2+'% / 솔리드 '+ppS2+'%</td></tr></tbody></table>';
+    const gt=sum(CH.map(c=>sum(c.monthly)));const tP=sum(CH.map(c=>c.pat_qty));const tB=sum(CH.map(c=>c.big_qty||0));const tSB=sum(CH.map(c=>c.sbig_qty||0));const tS=gt-tP-tB-tSB;const patLeft=PAT_MAX-tP-tB,solLeft=SOL_MAX-tS-tSB;
+    let h='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+    [{l:'패턴',c:'#5B86E5',v:tP,mx:PAT_MAX,left:patLeft},{l:'패턴 XL',c:'#8B5CF6',v:tB,pct:true},{l:'솔리드',c:'#FF6347',v:tS,mx:SOL_MAX,left:solLeft},{l:'솔리드 XL',c:'#E67E22',v:tSB,pct:true}].forEach(d=>{
+        const over=d.left!==undefined&&d.left<0;
+        h+='<div style="padding:12px;background:'+(over?'#FDE8E8':(d.pct?'#F5F0FF':'#f9f9f9'))+';border-radius:10px;border:2px solid '+(over?'#E31837':'transparent')+'">';
+        h+='<div style="font-weight:700;color:'+d.c+';font-size:13px">'+d.l+'</div>';
+        h+='<div style="font-size:24px;font-weight:800;color:'+(over?'#E31837':d.c)+'">'+d.v.toLocaleString()+'<span style="font-size:12px;font-weight:600">장</span></div>';
+        if(d.mx){h+='<div style="font-size:11px;color:'+(over?'#E31837':'#666')+'">MAX '+d.mx.toLocaleString()+' / 잔여 '+d.left.toLocaleString()+(over?' !!':'')+'</div>'}
+        else{h+='<div style="font-size:11px;color:#666">전체의 '+(gt>0?Math.round(d.v/gt*100):0)+'%</div>'}
+        h+='</div>';
+    });
+    h+='</div>';
+    h+='<table class="etbl"><thead><tr><th>채널</th><th>총량</th><th style="color:#5B86E5">패턴</th><th style="color:#8B5CF6">패턴XL</th><th style="color:#E67E22">솔리드XL</th><th style="color:#FF6347">솔리드</th><th style="width:120px">비율</th><th style="text-align:left">메모</th></tr></thead><tbody>';
+    CH.forEach((c,ci)=>{const t=sum(c.monthly);const p=c.pat_qty;const b=c.big_qty||0;const sb=c.sbig_qty||0;const s=t-p-b-sb;
+    h+='<tr style="border-bottom:1px solid #eee"><td style="padding:6px;font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:4px"></span>'+c.short+'</td><td style="text-align:center;font-weight:600">'+t.toLocaleString()+'</td>';
+    h+='<td style="text-align:center"><input type="text" class="ei'+(p!==ORIG_P[ci]?' changed':'')+'" style="width:55px" value="'+p.toLocaleString()+'" data-ci="'+ci+'" data-type="pat" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
+    h+='<td style="text-align:center"><input type="text" class="ei'+(b!==(ORIG_B[ci]||0)?' changed':'')+'" style="width:55px" value="'+b.toLocaleString()+'" data-ci="'+ci+'" data-type="big" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
+    h+='<td style="text-align:center"><input type="text" class="ei'+(sb!==(ORIG_SB[ci]||0)?' changed':'')+'" style="width:55px" value="'+sb.toLocaleString()+'" data-ci="'+ci+'" data-type="sbig" onfocus="this.select()" onchange="onPE(this)" onblur="onPE(this)"></td>';
+    h+='<td style="text-align:center;color:#FF6347;font-weight:700;font-size:12px">'+s.toLocaleString()+'</td>';
+    const ppP=t>0?Math.round(p/t*100):0;const ppB=t>0?Math.round(b/t*100):0;const ppSB=t>0?Math.round(sb/t*100):0;const ppS=Math.max(0,100-ppP-ppB-ppSB);
+    h+='<td><div style="display:flex;height:12px;border-radius:6px;overflow:hidden">';
+    if(ppP>0)h+='<div style="width:'+ppP+'%;background:#5B86E5"></div>';if(ppB>0)h+='<div style="width:'+ppB+'%;background:#8B5CF6"></div>';if(ppSB>0)h+='<div style="width:'+ppSB+'%;background:#E67E22"></div>';if(ppS>0)h+='<div style="width:'+ppS+'%;background:#FF6347"></div>';
+    h+='</div></td><td style="font-size:10px;color:#666;padding-left:8px">'+c.pat_note+'</td></tr>'});
+    h+='<tr style="border-top:2px solid #333;font-weight:700;background:#f9f9f4"><td style="padding:6px">합계</td><td style="text-align:center">'+gt.toLocaleString()+'</td><td style="text-align:center;color:#5B86E5">'+tP.toLocaleString()+'</td><td style="text-align:center;color:#8B5CF6">'+tB.toLocaleString()+'</td><td style="text-align:center;color:#E67E22">'+tSB.toLocaleString()+'</td><td style="text-align:center;color:#FF6347">'+tS.toLocaleString()+'</td>';
+    h+='<td colspan="2" style="font-size:10px;color:#666;padding-left:8px">P '+(gt>0?Math.round(tP/gt*100):0)+'% / PX '+(gt>0?Math.round(tB/gt*100):0)+'% / SX '+(gt>0?Math.round(tSB/gt*100):0)+'% / S '+(gt>0?Math.round(tS/gt*100):0)+'%</td></tr></tbody></table>';
     document.getElementById('ps-strategy').innerHTML=h;
 }
-function onPE(el){const ci=+el.dataset.ci;const tp=el.dataset.type||'pat';let v=parseInt(el.value.replace(/[^0-9]/g,''));if(isNaN(v))v=0;const t=sum(CH[ci].monthly);if(tp==='pat'){const b=CH[ci].big_qty||0;if(v>t-b)v=t-b;CH[ci].pat_qty=v;el.classList.toggle('changed',v!==ORIG_P[ci])}else{const p=CH[ci].pat_qty;if(v>t-p)v=t-p;CH[ci].big_qty=v;el.classList.toggle('changed',v!==(ORIG_B[ci]||0))}el.value=v.toLocaleString();renderPlanAll()}
+function onPE(el){const ci=+el.dataset.ci;const tp=el.dataset.type||'pat';let v=parseInt(el.value.replace(/[^0-9]/g,''));if(isNaN(v))v=0;const t=sum(CH[ci].monthly);const p=tp==='pat'?v:CH[ci].pat_qty;const b=tp==='big'?v:(CH[ci].big_qty||0);const sb=tp==='sbig'?v:(CH[ci].sbig_qty||0);if(p+b+sb>t)v=Math.max(0,t-(tp==='pat'?b+sb:tp==='big'?p+sb:p+b));if(tp==='pat'){CH[ci].pat_qty=v;el.classList.toggle('changed',v!==ORIG_P[ci])}else if(tp==='big'){CH[ci].big_qty=v;el.classList.toggle('changed',v!==(ORIG_B[ci]||0))}else{CH[ci].sbig_qty=v;el.classList.toggle('changed',v!==(ORIG_SB[ci]||0))}el.value=v.toLocaleString();renderPlanAll()}
 function renderWeekly(){
     const gt=sum(CH.map(c=>sum(c.monthly)));let hdr='<th>주차</th><th>기간</th>';CH.forEach(c=>{hdr+='<th>'+c.short+'</th>'});hdr+='<th>합계</th><th>누적</th><th style="width:110px">소진율</th>';document.getElementById('wh').innerHTML=hdr;
     const mcss=['wsep','woct','wnov','wdec','wjan'];
@@ -415,28 +425,36 @@ const P=(function(){
     const fW=n=>n>=1e8?(n/1e8).toFixed(2)+'억':n>=1e4?Math.round(n/1e4).toLocaleString()+'만':fN(n)+'원';
 
     let D={
-        usd_pat:0,usd_big:0,usd_sol:0,
+        usd_pat:0,usd_big:0,usd_sol:0,usd_sbig:0,
         old_pat_retail:0,old_pat_price:0,old_pat_cogs:0,
         old_big_retail:0,old_big_price:0,old_big_cogs:0,
         old_sol_retail:0,old_sol_price:0,old_sol_cogs:0,
+        old_sbig_retail:0,old_sbig_price:0,old_sbig_cogs:0,
         new_pat_retail:0,new_pat_price:0,new_pat_cogs:0,
         new_big_retail:0,new_big_price:0,new_big_cogs:0,
         new_sol_retail:0,new_sol_price:0,new_sol_cogs:0,
+        new_sbig_retail:0,new_sbig_price:0,new_sbig_cogs:0,
         mkt_old:{},mkt_new:{}
     };
+    const PTYPES=[
+        {k:'pat',l:'패턴',c:'#5B86E5',roy:true},
+        {k:'big',l:'패턴 XL',c:'#8B5CF6',roy:true},
+        {k:'sol',l:'솔리드',c:'#FF6347',roy:false},
+        {k:'sbig',l:'솔리드 XL',c:'#E67E22',roy:false}
+    ];
 
     function disc(retail,price){return retail>0?((1-price/retail)*100):0}
 
-    function getQty(ci){const c=CH[ci];const t=sum(c.monthly);const b=c.big_qty||0;return{pat:c.pat_qty,big:b,sol:t-c.pat_qty-b,total:t}}
+    function getQty(ci){const c=CH[ci];const t=sum(c.monthly);const b=c.big_qty||0;const sb=c.sbig_qty||0;return{pat:c.pat_qty,big:b,sol:t-c.pat_qty-b-sb,sbig:sb,total:t}}
 
-    function blend(patV,bigV,solV,ci){
+    function blendAll(fn,ci){
         const q=getQty(ci);
-        return q.total>0?(patV*q.pat+bigV*q.big+solV*q.sol)/q.total:0;
+        return q.total>0?(fn('pat')*q.pat+fn('big')*q.big+fn('sol')*q.sol+fn('sbig')*q.sbig)/q.total:0;
     }
 
     function oldVarPct(ci){
-        const bp=blend(D.old_pat_price,D.old_big_price||D.old_pat_price,D.old_sol_price,ci);
-        const bc=blend(D.old_pat_cogs,D.old_big_cogs||D.old_pat_cogs,D.old_sol_cogs,ci);
+        const bp=blendAll(k=>(D['old_'+k+'_price']||D.old_pat_price),ci);
+        const bc=blendAll(k=>(D['old_'+k+'_cogs']||D.old_pat_cogs),ci);
         if(bp<=0)return 0;
         return(bp-bc-CH[ci].cm_unit)/bp*100;
     }
@@ -452,87 +470,67 @@ const P=(function(){
     function newCmUnit(ci,priceMod,cogsMod){
         const pm=priceMod||0,cm0=cogsMod||0;
         const q=getQty(ci);const nvr=newVarRatio(ci);
-        if(q.total===0)return{pat:0,big:0,sol:0,blended:0};
-        const pp=D.new_pat_price*(1+pm/100),pc=D.new_pat_cogs*(1+cm0/100);
-        const gp=(D.new_big_price||D.new_pat_price)*(1+pm/100),gc=(D.new_big_cogs||D.new_pat_cogs)*(1+cm0/100);
-        const sp=D.new_sol_price*(1+pm/100),sc=D.new_sol_cogs*(1+cm0/100);
-        const patCM=pp*(1-nvr)-pc;
-        const bigCM=gp*(1-nvr)-gc;
-        const solCM=sp*(1-nvr)-sc;
-        const blended=(patCM*q.pat+bigCM*q.big+solCM*q.sol)/q.total;
-        return{pat:patCM,big:bigCM,sol:solCM,blended};
+        if(q.total===0)return{pat:0,big:0,sol:0,sbig:0,blended:0};
+        const r={};
+        PTYPES.forEach(t=>{
+            const p=(D['new_'+t.k+'_price']||D.new_pat_price)*(1+pm/100);
+            const c=(D['new_'+t.k+'_cogs']||D.new_pat_cogs)*(1+cm0/100);
+            r[t.k]=p*(1-nvr)-c;
+        });
+        r.blended=(r.pat*q.pat+r.big*q.big+r.sol*q.sol+r.sbig*q.sbig)/q.total;
+        return r;
     }
 
     function inp(id,val,ph,st){
         return '<input class="pinp" style="width:100%;font-size:14px;font-weight:700;padding:6px;'+(st||'')+'" value="'+(val||'')+'" placeholder="'+(ph||'0')+'" onfocus="this.select()" onchange="P.onD(\''+id+'\',this)" onblur="P.onD(\''+id+'\',this)">';
     }
 
+    function usdCalc(k){
+        const t=PTYPES.find(x=>x.k===k);
+        const u=D['usd_'+k]||0;const p=D['new_'+k+'_price']||0;
+        if(t&&t.roy)return Math.round(u*1550+(p*0.066+3.3));
+        return Math.round(u*1550);
+    }
+
     function renderInputs(){
-        let h='<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:16px 20px;background:linear-gradient(135deg,#EBF3FE,#F0F7FF);border-radius:12px;border:1px solid #B8D4FE">';
-        h+='<div style="font-weight:800;color:#5B86E5;font-size:15px;white-space:nowrap">$ USD 원가</div>';
-        h+='<div><label style="font-size:11px;color:#888;display:block;margin-bottom:2px">패턴 (USD)</label><input class="pinp" style="width:80px;font-size:14px" value="'+(D.usd_pat||'')+'" placeholder="0.00" onfocus="this.select()" oninput="P.previewUSD(\'pat\',this)" onblur="P.onUSD(\'pat\',this)"><div id="usd-pv-pat" style="font-size:11px;color:#2D5F2D;font-weight:700;margin-top:2px">'+(D.usd_pat>0?'→ ₩'+Math.round(D.usd_pat*1550+(D.new_pat_price*0.066+3.3)).toLocaleString():'')+'</div></div>';
-        h+='<div><label style="font-size:11px;color:#888;display:block;margin-bottom:2px">대형견 (USD)</label><input class="pinp" style="width:80px;font-size:14px" value="'+(D.usd_big||'')+'" placeholder="0.00" onfocus="this.select()" oninput="P.previewUSD(\'big\',this)" onblur="P.onUSD(\'big\',this)"><div id="usd-pv-big" style="font-size:11px;color:#2D5F2D;font-weight:700;margin-top:2px">'+(D.usd_big>0?'→ ₩'+Math.round(D.usd_big*1550+((D.new_big_price||D.new_pat_price)*0.066+3.3)).toLocaleString():'')+'</div></div>';
-        h+='<div><label style="font-size:11px;color:#888;display:block;margin-bottom:2px">솔리드 (USD)</label><input class="pinp" style="width:80px;font-size:14px" value="'+(D.usd_sol||'')+'" placeholder="0.00" onfocus="this.select()" oninput="P.previewUSD(\'sol\',this)" onblur="P.onUSD(\'sol\',this)"><div id="usd-pv-sol" style="font-size:11px;color:#2D5F2D;font-weight:700;margin-top:2px">'+(D.usd_sol>0?'→ ₩'+Math.round(D.usd_sol*1550).toLocaleString():'')+'</div></div>';
-        h+='<div style="font-size:11px;color:#5B86E5;line-height:1.5"><b>$1 = ₩1,550</b> (고정)<br><span style="color:#888">패턴/대형견: USD x 1,550 + (판매가 x 0.066 + 3.3)<br>솔리드: USD x 1,550</span></div>';
-        h+='</div>';
-        h+='<table class="etbl" style="font-size:11px"><thead>';
-        h+='<tr><th rowspan="2" style="width:56px"></th>';
-        h+='<th colspan="4" style="background:#5B86E5;color:#fff;text-align:center">더블히트 (패턴)</th>';
-        h+='<th colspan="4" style="background:#8B5CF6;color:#fff;text-align:center">대형견</th>';
-        h+='<th colspan="4" style="background:#FF6347;color:#fff;text-align:center">솔리드</th></tr>';
-        h+='<tr>';
-        ['#5B86E5','#8B5CF6','#FF6347'].forEach(bg=>{
-            ['소비자가','판매가','할인율','원가'].forEach(lb=>{
-                h+='<th style="background:'+bg+';color:#fff;font-size:10px;padding:5px 3px">'+lb+'</th>';
-            });
+        let h='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;padding:16px;background:linear-gradient(135deg,#EBF3FE,#F0F7FF);border-radius:12px;border:1px solid #B8D4FE">';
+        h+='<div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;color:#5B86E5;font-size:15px">$ USD 원가</div><div style="font-size:11px;color:#888">$1 = ₩1,550 (고정) | 패턴계열: +판매가x0.066+3.3</div></div>';
+        PTYPES.forEach(t=>{
+            const u=D['usd_'+t.k]||0;const cv=usdCalc(t.k);
+            h+='<div><label style="font-size:11px;color:'+t.c+';font-weight:600;display:block;margin-bottom:2px">'+t.l+'</label>';
+            h+='<input class="pinp" style="width:100%;font-size:14px" value="'+(u||'')+'" placeholder="0.00" onfocus="this.select()" oninput="P.previewUSD(\''+t.k+'\',this)" onblur="P.onUSD(\''+t.k+'\',this)">';
+            h+='<div id="usd-pv-'+t.k+'" style="font-size:11px;color:#2D5F2D;font-weight:700;margin-top:2px">'+(u>0?'→ ₩'+cv.toLocaleString():'')+'</div></div>';
         });
+        h+='</div>';
+
+        h+='<table class="etbl"><thead><tr>';
+        h+='<th style="width:90px">상품</th><th style="width:50px">구분</th>';
+        h+='<th>소비자가</th><th>판매가</th><th style="width:60px">할인율</th><th>원가</th><th style="width:70px">원가율</th>';
         h+='</tr></thead><tbody>';
 
-        const odp=disc(D.old_pat_retail,D.old_pat_price);
-        const odb=disc(D.old_big_retail,D.old_big_price);
-        const ods=disc(D.old_sol_retail,D.old_sol_price);
-        const ndp=disc(D.new_pat_retail,D.new_pat_price);
-        const ndb=disc(D.new_big_retail,D.new_big_price);
-        const nds=disc(D.new_sol_retail,D.new_sol_price);
+        PTYPES.forEach(t=>{
+            const od=disc(D['old_'+t.k+'_retail'],D['old_'+t.k+'_price']);
+            const nd=disc(D['new_'+t.k+'_retail'],D['new_'+t.k+'_price']);
+            const ocr=D['old_'+t.k+'_price']>0?(D['old_'+t.k+'_cogs']/D['old_'+t.k+'_price']*100):0;
+            const ncr=D['new_'+t.k+'_price']>0?(D['new_'+t.k+'_cogs']/D['new_'+t.k+'_price']*100):0;
 
-        h+='<tr style="background:#f9f9f9"><td style="font-weight:700;color:#888;font-size:12px">기존</td>';
-        h+='<td>'+inp('old_pat_retail',D.old_pat_retail)+'</td>';
-        h+='<td>'+inp('old_pat_price',D.old_pat_price)+'</td>';
-        h+='<td style="font-weight:700;background:#f0f0f0;text-align:center;color:'+(odp>0?'#E31837':'#333')+'">'+fP(odp)+'</td>';
-        h+='<td>'+inp('old_pat_cogs',D.old_pat_cogs)+'</td>';
-        h+='<td>'+inp('old_big_retail',D.old_big_retail)+'</td>';
-        h+='<td>'+inp('old_big_price',D.old_big_price)+'</td>';
-        h+='<td style="font-weight:700;background:#f0f0f0;text-align:center;color:'+(odb>0?'#E31837':'#333')+'">'+fP(odb)+'</td>';
-        h+='<td>'+inp('old_big_cogs',D.old_big_cogs)+'</td>';
-        h+='<td>'+inp('old_sol_retail',D.old_sol_retail)+'</td>';
-        h+='<td>'+inp('old_sol_price',D.old_sol_price)+'</td>';
-        h+='<td style="font-weight:700;background:#f0f0f0;text-align:center;color:'+(ods>0?'#E31837':'#333')+'">'+fP(ods)+'</td>';
-        h+='<td>'+inp('old_sol_cogs',D.old_sol_cogs)+'</td></tr>';
+            h+='<tr style="background:#f9f9f9"><td rowspan="2" style="font-weight:700;color:'+t.c+';font-size:13px;vertical-align:middle;border-left:4px solid '+t.c+';padding-left:10px">'+t.l+(t.roy?'<br><span style="font-size:9px;color:#888">+로열티</span>':'')+'</td>';
+            h+='<td style="font-weight:600;color:#888;font-size:11px">기존</td>';
+            h+='<td>'+inp('old_'+t.k+'_retail',D['old_'+t.k+'_retail'])+'</td>';
+            h+='<td>'+inp('old_'+t.k+'_price',D['old_'+t.k+'_price'])+'</td>';
+            h+='<td style="font-weight:700;background:#f0f0f0;text-align:center;color:'+(od>0?'#E31837':'#333')+'">'+fP(od)+'</td>';
+            h+='<td>'+inp('old_'+t.k+'_cogs',D['old_'+t.k+'_cogs'])+'</td>';
+            h+='<td style="font-size:11px;color:#888;text-align:center">'+fP(ocr)+'</td></tr>';
 
-        h+='<tr style="background:#F0FAF0"><td style="font-weight:700;color:#2D5F2D;font-size:12px">신규</td>';
-        h+='<td>'+inp('new_pat_retail',D.new_pat_retail)+'</td>';
-        h+='<td>'+inp('new_pat_price',D.new_pat_price)+'</td>';
-        h+='<td style="font-weight:700;background:#e8f5e9;text-align:center;color:'+(ndp>0?'#E31837':'#2D5F2D')+'">'+fP(ndp)+'</td>';
-        h+='<td>'+inp('new_pat_cogs',D.new_pat_cogs)+'</td>';
-        h+='<td>'+inp('new_big_retail',D.new_big_retail)+'</td>';
-        h+='<td>'+inp('new_big_price',D.new_big_price)+'</td>';
-        h+='<td style="font-weight:700;background:#e8f5e9;text-align:center;color:'+(ndb>0?'#E31837':'#2D5F2D')+'">'+fP(ndb)+'</td>';
-        h+='<td>'+inp('new_big_cogs',D.new_big_cogs)+'</td>';
-        h+='<td>'+inp('new_sol_retail',D.new_sol_retail)+'</td>';
-        h+='<td>'+inp('new_sol_price',D.new_sol_price)+'</td>';
-        h+='<td style="font-weight:700;background:#e8f5e9;text-align:center;color:'+(nds>0?'#E31837':'#2D5F2D')+'">'+fP(nds)+'</td>';
-        h+='<td>'+inp('new_sol_cogs',D.new_sol_cogs)+'</td></tr>';
+            h+='<tr style="background:#F0FAF0">';
+            h+='<td style="font-weight:600;color:#2D5F2D;font-size:11px">신규</td>';
+            h+='<td>'+inp('new_'+t.k+'_retail',D['new_'+t.k+'_retail'])+'</td>';
+            h+='<td>'+inp('new_'+t.k+'_price',D['new_'+t.k+'_price'])+'</td>';
+            h+='<td style="font-weight:700;background:#e8f5e9;text-align:center;color:'+(nd>0?'#E31837':'#2D5F2D')+'">'+fP(nd)+'</td>';
+            h+='<td>'+inp('new_'+t.k+'_cogs',D['new_'+t.k+'_cogs'])+'</td>';
+            h+='<td style="font-size:11px;font-weight:700;color:#2D5F2D;text-align:center">'+fP(ncr)+'</td></tr>';
+        });
 
-        const opr=D.old_pat_price>0?(D.old_pat_cogs/D.old_pat_price*100):0;
-        const npr=D.new_pat_price>0?(D.new_pat_cogs/D.new_pat_price*100):0;
-        const obr=D.old_big_price>0?(D.old_big_cogs/D.old_big_price*100):0;
-        const nbr=D.new_big_price>0?(D.new_big_cogs/D.new_big_price*100):0;
-        const osr=D.old_sol_price>0?(D.old_sol_cogs/D.old_sol_price*100):0;
-        const nsr=D.new_sol_price>0?(D.new_sol_cogs/D.new_sol_price*100):0;
-        h+='<tr><td style="font-size:10px;color:#888">원가율</td>';
-        h+='<td colspan="4" style="font-size:11px;color:#888">패턴 '+fP(opr)+' → <b style="color:#2D5F2D">'+fP(npr)+'</b></td>';
-        h+='<td colspan="4" style="font-size:11px;color:#888">대형 '+fP(obr)+' → <b style="color:#2D5F2D">'+fP(nbr)+'</b></td>';
-        h+='<td colspan="4" style="font-size:11px;color:#888">솔리드 '+fP(osr)+' → <b style="color:#2D5F2D">'+fP(nsr)+'</b></td></tr>';
         h+='</tbody></table>';
         document.getElementById('p-inputs').innerHTML=h;
     }
@@ -611,7 +609,7 @@ const P=(function(){
             const oth=otherPct(ci);
             const oldCM=q.total*c.cm_unit;
             const nc=newCmUnit(ci,priceMod,cogsMod);
-            const newCM=nc.pat*q.pat+nc.big*q.big+nc.sol*q.sol;
+            const newCM=nc.pat*q.pat+nc.big*q.big+nc.sol*q.sol+nc.sbig*q.sbig;
             const diff=newCM-oldCM;
             const pct=oldCM!==0?(diff/Math.abs(oldCM)*100):0;
             oldTotal+=oldCM;newTotal+=newCM;totalQty+=q.total;
@@ -621,7 +619,7 @@ const P=(function(){
         rows.forEach(d=>{
             const cls=d.diff>=0?'cm-pos':'cm-neg';
             h+='<tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+d.c.color+';margin-right:6px"></span>'+d.c.short+'</td>';
-            h+='<td>'+fN(d.q.total)+'<span style="font-size:10px;color:#888"> (P'+fN(d.q.pat)+(d.q.big?'/B'+fN(d.q.big):'')+'/S'+fN(d.q.sol)+')</span></td>';
+            h+='<td>'+fN(d.q.total)+'<span style="font-size:10px;color:#888"> (P'+fN(d.q.pat)+(d.q.big?'/PX'+fN(d.q.big):'')+(d.q.sbig?'/SX'+fN(d.q.sbig):'')+'/S'+fN(d.q.sol)+')</span></td>';
             h+='<td style="font-size:11px;color:#E67E22">'+fP(d.nm)+'</td>';
             h+='<td style="font-size:11px;color:#3498DB">'+fP(d.oth)+'</td>';
             h+='<td style="color:#888">'+fN(d.c.cm_unit)+'</td>';
@@ -682,7 +680,7 @@ const P=(function(){
                 if(c.short==='시딩')return;
                 const q=getQty(ci);if(!q.total)return;
                 const nc=newCmUnit(ci,s.pr,s.cg);
-                gCM+=nc.pat*q.pat+nc.big*q.big+nc.sol*q.sol;
+                gCM+=nc.pat*q.pat+nc.big*q.big+nc.sol*q.sol+nc.sbig*q.sbig;
             });
             const diff=gCM-base.newTotal;
             h+='<div class="sc-card" style="background:'+s.bg+'">';
@@ -697,15 +695,15 @@ const P=(function(){
     function load(){try{const s=localStorage.getItem('dh_pricing5');if(s){const p=JSON.parse(s);Object.assign(D,p);if(p.mkt_old)D.mkt_old=p.mkt_old;if(p.mkt_new)D.mkt_new=p.mkt_new}}catch(e){}}
 
     return{
-        onD(k,el){D[k]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;if(k==='new_pat_price'&&D.usd_pat>0){D.new_pat_cogs=Math.round(D.usd_pat*1550+(D.new_pat_price*0.066+3.3))}if(k==='new_big_price'&&D.usd_big>0){D.new_big_cogs=Math.round(D.usd_big*1550+(D.new_big_price*0.066+3.3))}this.renderAll()},
-        previewUSD(t,el){const v=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;const pv=document.getElementById('usd-pv-'+t);if(t==='pat'){const c=Math.round(v*1550+(D.new_pat_price*0.066+3.3));pv.textContent=v>0?'→ ₩'+c.toLocaleString():''}else if(t==='big'){const c=Math.round(v*1550+((D.new_big_price||D.new_pat_price)*0.066+3.3));pv.textContent=v>0?'→ ₩'+c.toLocaleString():''}else{const c=Math.round(v*1550);pv.textContent=v>0?'→ ₩'+c.toLocaleString():''}},
-        onUSD(t,el){const v=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;if(t==='pat'){D.usd_pat=v;D.new_pat_cogs=Math.round(v*1550+(D.new_pat_price*0.066+3.3))}else if(t==='big'){D.usd_big=v;D.new_big_cogs=Math.round(v*1550+((D.new_big_price||D.new_pat_price)*0.066+3.3))}else{D.usd_sol=v;D.new_sol_cogs=Math.round(v*1550)}this.renderAll()},
+        onD(k,el){D[k]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;const m=k.match(/^new_(\w+)_price$/);if(m&&D['usd_'+m[1]]>0){D['new_'+m[1]+'_cogs']=usdCalc(m[1])}this.renderAll()},
+        previewUSD(t,el){const v=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;const pv=document.getElementById('usd-pv-'+t);D['usd_'+t]=v;const c=usdCalc(t);pv.textContent=v>0?'→ ₩'+c.toLocaleString():''},
+        onUSD(t,el){const v=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;D['usd_'+t]=v;D['new_'+t+'_cogs']=usdCalc(t);this.renderAll()},
         onMktOld(ci,el){D.mkt_old[ci]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
         onMktNew(ci,el){D.mkt_new[ci]=parseFloat(el.value.replace(/[^0-9.\-]/g,''))||0;this.renderAll()},
         getState(){return JSON.parse(JSON.stringify(D))},
         setState(s){Object.assign(D,s);if(s.mkt_old)D.mkt_old=s.mkt_old;if(s.mkt_new)D.mkt_new=s.mkt_new},
         renderAll(){renderInputs();renderVarCost();renderCompare();renderScenario();save()},
-        init(){load();if(D.usd_pat>0){D.new_pat_cogs=Math.round(D.usd_pat*1550+(D.new_pat_price*0.066+3.3))}if(D.usd_big>0){D.new_big_cogs=Math.round(D.usd_big*1550+((D.new_big_price||D.new_pat_price)*0.066+3.3))}if(D.usd_sol>0){D.new_sol_cogs=Math.round(D.usd_sol*1550)}},
+        init(){load();PTYPES.forEach(t=>{if(D['usd_'+t.k]>0){D['new_'+t.k+'_cogs']=usdCalc(t.k)}})},
         exportData(){toast('localStorage에 자동 저장됨')},
         handleImport(){}
     };
