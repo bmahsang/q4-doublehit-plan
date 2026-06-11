@@ -120,10 +120,10 @@
     0
   ],
   "pricing": {
-    "usd_pat": 7.3,
-    "usd_big": 8.9,
-    "usd_sol": 7.3,
-    "usd_sbig": 8.9,
+    "usd_pat": 7,
+    "usd_big": 8.2,
+    "usd_sol": 7,
+    "usd_sbig": 8.2,
     "old_pat_retail": 54000,
     "old_pat_price": 45900,
     "old_pat_cogs": 11500,
@@ -138,16 +138,16 @@
     "old_sbig_cogs": 14900,
     "new_pat_retail": 49900,
     "new_pat_price": 49900,
-    "new_pat_cogs": 14612,
+    "new_pat_cogs": 14147,
     "new_big_retail": 57900,
     "new_big_price": 57900,
-    "new_big_cogs": 17620,
+    "new_big_cogs": 16535,
     "new_sol_retail": 46900,
     "new_sol_price": 46900,
-    "new_sol_cogs": 11315,
+    "new_sol_cogs": 10850,
     "new_sbig_retail": 54900,
     "new_sbig_price": 54900,
-    "new_sbig_cogs": 13795,
+    "new_sbig_cogs": 12710,
     "mkt_old": {
       "0": 13,
       "1": 7,
@@ -170,5 +170,5 @@
     }
   },
   "saved_by": "김상아",
-  "saved_at": "2026-06-11 16:44"
+  "saved_at": "2026-06-11 18:04"
 }
