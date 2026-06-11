@@ -317,7 +317,6 @@ const ORIG_B=CH.map(c=>c.big_qty||0);
 const ORIG_SB=CH.map(c=>c.sbig_qty||0);
 const PAT_MAX=30000,SOL_MAX=20000;
 const BIG_R=1130/30000,SBIG_R=810/20700;
-const LAST_RATIO={스스:79.7,쿠팡:0,자사몰:66.9,무신사:83.0,오프라인:66.7,해외:0,페어:94.9,B2B:69.2};
 const REPO='bmahsang/q4-doublehit-plan';
 let _ghSha=null;
 
@@ -376,14 +375,13 @@ function renderPS(){
     h+='<div style="padding:12px;background:'+(solLeft<0?'#FDE8E8':'#f9f9f9')+';border-radius:10px;border:2px solid '+(solLeft<0?'#E31837':'transparent')+'"><div style="font-weight:700;color:#FF6347;font-size:13px">솔리드계 (기본+추가)</div><div style="font-size:24px;font-weight:800;color:'+(solLeft<0?'#E31837':'#FF6347')+'">'+solAll.toLocaleString()+'<span style="font-size:12px;font-weight:600">장</span></div><div style="font-size:11px;color:'+(solLeft<0?'#E31837':'#666')+'">MAX '+SOL_MAX.toLocaleString()+' / 잔여 '+solLeft.toLocaleString()+(solLeft<0?' !!':'')+'</div></div>';
     h+='<div style="padding:12px;background:#E8F5E9;border-radius:10px;border:2px solid #C8E6C9"><div style="font-weight:700;color:#2D5F2D;font-size:13px">솔리드 추가분</div><div style="font-size:24px;font-weight:800;color:#2D5F2D">+'+(tSE+tSBE).toLocaleString()+'<span style="font-size:12px;font-weight:600">장</span></div><div style="font-size:11px;color:#666">소형 +'+tSE.toLocaleString()+' / 대형 +'+tSBE.toLocaleString()+'</div></div>';
     h+='</div>';
-    h+='<table class="etbl"><thead><tr><th>채널</th><th>총량</th><th style="color:#5B86E5;width:55px">패턴%</th><th style="color:#999;width:45px;font-size:10px">작년%</th><th style="color:#5B86E5">패턴</th><th style="color:#8B5CF6">패대</th><th style="color:#FF6347">솔</th><th style="color:#E67E22">솔대</th><th style="color:#2D5F2D;background:#F0FAF0">+솔추가</th><th style="color:#2D5F2D;background:#F0FAF0">+대형추가</th><th>최종</th></tr></thead><tbody>';
+    h+='<table class="etbl"><thead><tr><th>채널</th><th>총량</th><th style="color:#5B86E5;width:55px">패턴%</th><th style="color:#5B86E5">패턴</th><th style="color:#8B5CF6">패대</th><th style="color:#FF6347">솔</th><th style="color:#E67E22">솔대</th><th style="color:#2D5F2D;background:#F0FAF0">+솔추가</th><th style="color:#2D5F2D;background:#F0FAF0">+대형추가</th><th>최종</th></tr></thead><tbody>';
     CH.forEach((c,ci)=>{const t=sum(c.monthly);const p=c.pat_qty;const b=c.big_qty||0;const sb=c.sbig_qty||0;const s=t-p-b-sb;const pct=t>0?Math.round((p+b)/t*100):0;const se=c.sol_extra||0;const sbe=c.sbig_extra||0;const ft=t+se+sbe;const isSeed=c.short==='시딩';
     h+='<tr style="border-bottom:1px solid #eee'+(isSeed?';background:#FFFDF0':'')+'">';
     h+='<td style="padding:5px;font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c.color+';margin-right:4px"></span>'+c.short+'</td>';
     if(isSeed){const ss=c.sol_extra||0;
     h+='<td style="text-align:center;font-weight:600;font-size:12px">'+(p+b+ss+sb).toLocaleString()+'</td>';
     h+='<td style="text-align:center;color:#888;font-size:10px">자유</td>';
-    h+='<td style="text-align:center;color:#ccc;font-size:10px">-</td>';
     h+='<td style="text-align:center"><input type="text" class="ei" style="width:50px" value="'+(p||'')+'" placeholder="0" data-ci="'+ci+'" data-type="pat" onfocus="this.select()" onchange="onSeed(this)" onblur="onSeed(this)"></td>';
     h+='<td style="text-align:center"><input type="text" class="ei" style="width:50px" value="'+(b||'')+'" placeholder="0" data-ci="'+ci+'" data-type="big" onfocus="this.select()" onchange="onSeed(this)" onblur="onSeed(this)"></td>';
     h+='<td style="text-align:center"><input type="text" class="ei" style="width:50px" value="'+(ss||'')+'" placeholder="0" data-ci="'+ci+'" data-type="sol" onfocus="this.select()" onchange="onSeed(this)" onblur="onSeed(this)"></td>';
@@ -392,7 +390,6 @@ function renderPS(){
     }else{
     h+='<td style="text-align:center;font-weight:600;font-size:12px">'+t.toLocaleString()+'</td>';
     h+='<td style="text-align:center;font-weight:700;color:#5B86E5;font-size:12px">'+pct+'%</td>';
-    const lr=LAST_RATIO[c.short];h+='<td style="text-align:center;color:#999;font-size:10px">'+(lr!==undefined?(lr>0?lr+'%':'전략'):'')+'</td>';
     h+='<td style="text-align:center;color:#5B86E5;font-weight:600;font-size:12px;background:#f8f8ff">'+p.toLocaleString()+'</td>';
     h+='<td style="text-align:center;color:#8B5CF6;font-weight:600;font-size:12px;background:#f8f8ff">'+b.toLocaleString()+'</td>';
     h+='<td style="text-align:center;color:#FF6347;font-weight:600;font-size:12px">'+s.toLocaleString()+'</td>';
@@ -405,7 +402,6 @@ function renderPS(){
     h+='</tr>'});
     const gt=gt0+tSE+tSBE;
     h+='<tr style="border-top:2px solid #333;font-weight:700;background:#f9f9f4"><td style="padding:5px">합계</td><td style="text-align:center">'+gt0.toLocaleString()+'</td><td style="text-align:center">'+(gt0>0?Math.round(patAll/gt0*100):0)+'%</td>';
-    h+='<td style="text-align:center;color:#999;font-size:10px">ref</td>';
     h+='<td style="text-align:center;color:#5B86E5">'+tP.toLocaleString()+'</td><td style="text-align:center;color:#8B5CF6">'+tB.toLocaleString()+'</td>';
     h+='<td style="text-align:center;color:#FF6347">'+tS.toLocaleString()+'</td><td style="text-align:center;color:#E67E22">'+tSB.toLocaleString()+'</td>';
     h+='<td style="text-align:center;color:#2D5F2D;background:#F0FAF0">'+tSE.toLocaleString()+'</td><td style="text-align:center;color:#2D5F2D;background:#F0FAF0">'+tSBE.toLocaleString()+'</td>';
